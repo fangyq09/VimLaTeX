@@ -1,5 +1,5 @@
 # VimLaTeX
-A vim plugin for writing LaTeX
+A vim plugin for writing LaTeX.
 It contains 
 - (1) a colorscheme: parbermad.vim (~/.vim/colors/parbermad.vim)
 - (2) a manual LaTeX fold plugin: tex_fold.vim (~/.vim/ftplugin/tex/tex_fold.vim),
