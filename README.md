@@ -7,3 +7,6 @@ It contains
 - (3) a compile plugin: tex_complile.vim (~/.vim/ftplugin/tex/compile.vim, need ~/.vim/compiler/latexmk.vim), https://www.vim.org/scripts/script.php?script_id=6060
 - (4) an omni completion plugin: omni.vim (~/.vim/ftplugin/tex/omni.vim, need ~/.vim/ftplugin/tex/completion/), https://www.vim.org/scripts/script.php?script_id=6059
 - (5) a template plugin: template.vim (~/.vim/ftplugin/tex/template.vim, need ~/.vim/ftplugin/tex/template/), https://www.vim.org/scripts/script.php?script_id=6061
+- (6) a plugin to insert latex commands and environments (~/.vim/ftplugin/tex/imaps.vim)
+- (7) a plugin to change environments (~/.vim/ftplugin/tex/env.vim)
+- (8) a plugin to complete \cite{ and \ref{ (~/.vim/ftplugin/tex/viewer.vim)
