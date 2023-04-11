@@ -6,4 +6,4 @@ It contains
 - (2) a manual LaTeX fold plugin: tex_fold.vim (~/.vim/ftplugin/tex/fold.vim), https://www.vim.org/scripts/script.php?script_id=6057
 - (3) a compile plugin: tex_complile.vim (~/.vim/ftplugin/tex/compile.vim, need ~/.vim/compiler/latexmk.vim), https://www.vim.org/scripts/script.php?script_id=6060
 - (4) an omni completion plugin: omni.vim (~/.vim/ftplugin/tex/omni.vim, need ~/.vim/ftplugin/tex/completion/), https://www.vim.org/scripts/script.php?script_id=6059
-- (5) a template plugin: template.vim (~/.vim/ftplugin/tex/template.vim, need ~/.vim/ftplugin/tex/template/)
+- (5) a template plugin: template.vim (~/.vim/ftplugin/tex/template.vim, need ~/.vim/ftplugin/tex/template/), https://www.vim.org/scripts/script.php?script_id=6061
