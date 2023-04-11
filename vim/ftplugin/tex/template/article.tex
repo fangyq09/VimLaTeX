@@ -1,0 +1,79 @@
+\documentclass[a4paper,12pt,reqno]{amsart}
+\usepackage[utf8x]{inputenc}
+%\usepackage[english,french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[a4paper,includeheadfoot,margin=2.54cm]{geometry}
+\usepackage{amsthm}%theoremstyle
+%\usepackage{amsmath}%mathbin,etc.
+\usepackage{mathtools}% an extension package to amsmath
+\mathtoolsset{showonlyrefs}
+\usepackage{xcolor}
+%%========================================================================
+\usepackage{enumitem}
+\setenumerate[1]{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
+\setitemize[1]{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
+\setdescription{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
+%%========================================================================
+%\usepackage{times}%times as default text fonts
+\usepackage[scaled=.92]{helvet} %set Helvetica as the sans-serif font
+\renewcommand{\rmdefault}{ptm}	% set Times as the default text font
+\usepackage{mathabx}% fonts for symbols,load before amsrefs
+%\usepackage{amssymb}%mathbb
+%\usepackage{mathrsfs}%mathscr
+\usepackage[cal=esstix,scr=rsfs,bb=ams,frak=euler]{mathalfa}
+%%========================================================================
+\usepackage{amsrefs}
+\usepackage{graphicx}
+\usepackage[
+colorlinks=true,
+linkcolor=purple,
+citecolor=blue,
+urlcolor=violet, 
+linktoc=all,
+hyperindex,
+plainpages=false,
+bookmarks=true,
+bookmarksopen=true,
+bookmarksnumbered]{hyperref}
+%%========================================================================
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem*{theorem*}{Theorem}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{example}[theorem]{Example}
+\newtheorem*{notation}{Notation}
+
+\numberwithin{equation}{section}
+%%========================================================================
+
+\begin{document}
+\title{XXX}
+\author{XXX}
+\address{\parbox{\linewidth}{\strut XXX\\ Department of Mathematics\\
+XXX University\\
+Code, City, Country\strut}}
+\email{xxx@gmail.com}
+\subjclass[2020]{Primary: 49J99; Secondaries: 49Q20}
+\keywords{XXX; XXX}
+\date{}
+\begin{abstract}
+	In this paper, ...
+\end{abstract}
+\maketitle
+
+\section{Introduction}
+\section{Preliminary}
+
+\bibliographystyle{plain}
+\bibliography{xxx}
+\end{document}
+
+

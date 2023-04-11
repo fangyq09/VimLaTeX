@@ -1,0 +1,42 @@
+%%========================================================================
+\RequirePackage{geometry}
+\geometry{a4paper,includeheadfoot,margin=2.54cm}
+%%========================================================================
+\RequirePackage{xcolor}
+%\RequirePackage{amsmath}
+\RequirePackage{amsthm}
+\RequirePackage{thmtools}
+\RequirePackage{mathtools}
+\mathtoolsset{showonlyrefs}% for hiding unused labels
+%%========================================================================
+%\RequirePackage{times}%times as default text fonts
+\RequirePackage[scaled=0.92]{helvet}	% set Helvetica as the sans-serif font
+\renewcommand{\rmdefault}{ptm}		% set Times as the default text font
+\RequirePackage{mathabx}% fonts for symbols
+%\RequirePackage{newtxtext}
+%\RequirePackage{newtxmath}
+\RequirePackage[cal=esstix,scr=rsfs,bb=ams,frak=euler]{mathalfa}
+%%========================================================================
+\RequirePackage{enumitem}
+\setenumerate[1]{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
+\setitemize[1]{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
+\setdescription{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
+
+\RequirePackage[obeyFinal,textsize=scriptsize,shadow]{todonotes}
+\RequirePackage{graphicx}
+\RequirePackage{amsrefs}
+\RequirePackage{hyperref}
+\hypersetup{
+	hyperindex,
+	plainpages=false,
+	bookmarks=true,
+	bookmarksopen=true,
+	bookmarksnumbered,
+	linktoc=all,
+	colorlinks=true,
+	linkcolor=purple,      % color of internal links
+	citecolor=blue,        % color of links to bibliography
+	filecolor=magenta,     % color of file links
+	urlcolor=violet,       % color of external links
+}
+%%========================================================================
