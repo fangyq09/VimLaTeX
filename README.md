@@ -1,5 +1,5 @@
 # VimTeXtric
-A vim plugin for writing LaTeX.
+A collection of vim plugins for writing LaTeX.
 It contains 
 - (0) an example of vimrc
 - (1) a colorscheme: parbermad.vim (~/.vim/colors/parbermad.vim), https://www.vim.org/scripts/script.php?script_id=6058
