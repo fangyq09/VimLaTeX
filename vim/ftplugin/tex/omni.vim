@@ -23,12 +23,12 @@ function! s:NextCharsMatch(regex)
 	return rest_of_line =~ a:regex
 endfunction
 
-let s:datadir=expand("<sfile>:p:h") ."/"
-let s:tex_unicode =s:datadir . "completion/unicodemath.txt"
-let s:tex_commands =s:datadir . "completion/commands.txt"
-let s:tex_env_data =s:datadir . "completion/environments.txt"
-let s:tex_packages_data =s:datadir . "completion/packages.txt"
-let s:tex_fonts_data =s:datadir . "completion/fonts.txt"
+let s:completiondatadir=expand("<sfile>:p:h") ."/completion/"
+let s:tex_unicode =s:completiondatadir . "unicodemath.txt"
+let s:tex_commands =s:completiondatadir . "commands.txt"
+let s:tex_env_data =s:completiondatadir . "environments.txt"
+let s:tex_packages_data =s:completiondatadir . "packages.txt"
+let s:tex_fonts_data =s:completiondatadir . "fonts.txt"
 
 inoremap <expr> <CR> pumvisible() ? "\<C-y>" : "\<C-g>u\<CR>"
 
