@@ -36,17 +36,18 @@ setlocal omnifunc=TEXOMNI
 let s:completion_type = ''
 
 function! TEXOMNI(findstart, base)  "{{{1
+		let line = getline('.')
 	if a:findstart
 		" return the starting position of the word
-		let line = getline('.')
 		let pos = col('.') - 1
-		while pos > 0 && line[pos - 1] !~ '\\\|{'
+		while pos > 0 && line[pos - 1] !~ '\(\\\|{\|\[\|,\|=\)'
 			let pos -= 1
 		endwhile
 
 		if line[pos - 1] == '\'
 			let pos -= 1
 		endif
+		let b:omni_start_pos = pos
 		return pos
 	else
 		" return suggestions in an array
@@ -56,50 +57,45 @@ function! TEXOMNI(findstart, base)  "{{{1
 		if escape(a:base, '\') =~ '^\\.*'
 			" suggest known commands
 			if filereadable(s:tex_commands) || filereadable(s:tex_unicode)
-				let lines =extend(readfile(s:tex_commands),readfile(s:tex_unicode))
-				for entry in lines
+				let com_list =extend(readfile(s:tex_commands),readfile(s:tex_unicode))
+				for entry in com_list
 					if entry =~ '^' . escape(a:base, '\')
 						call add(suggestions, entry)
 					endif
 				endfor
 			endif
-		elseif text =~ '\\\(begin\|end\)\_\s*{$'
+		elseif text =~ '\\\(begin\|end\)\s*{'
 			" suggest known environments
 			if filereadable(s:tex_env_data)
-				let lines = readfile(s:tex_env_data)
-				for entry in lines
+				let env_list = readfile(s:tex_env_data)
+				for entry in env_list
 					if entry =~ '^' . escape(a:base, '\')
-						if !s:NextCharsMatch('^}')
+						if !s:NextCharsMatch('}')
 							let entry = entry . '}'
 						endif
 						call add(suggestions, entry)
 					endif
 				endfor
 			endif
-		elseif text =~ '\\set\(CJK\)\=\(main\|sans\|mono\|math\|family\)font\(\[[^\]]*\]\)*\_\s*{$'
+		elseif text =~ '\\set\(CJK\)\=\(main\|sans\|mono\|math\|family\)font\(\[[^\]]*\]\)*\s*\(\[\|{\)'
 			" suggest known environments
 			if filereadable(s:tex_fonts_data)
-				let lines = readfile(s:tex_fonts_data)
-				for entry in lines
+				let font_list = readfile(s:tex_fonts_data)
+				for entry in font_list
 					if entry =~ '^' . escape(a:base, '\')
-						if !s:NextCharsMatch('^}')
+						if !s:NextCharsMatch('}') && (line[b:omni_start_pos - 1] == '{')
 							let entry = entry . '}'
 						endif
 						call add(suggestions, entry)
 					endif
 				endfor
 			endif
-		elseif text =~ '\\\(usepackage\|RequirePackage\)\(\[[^\]]*\]\)*\_\s*{'
-			"'\C\\usepackage\_\s*[$'
+		elseif text =~ '\\\(usepackage\|RequirePackage\)\(\[[^\]]*\]\)*\s*{'
 			" suggest known environments
 			if filereadable(s:tex_packages_data)
-				let lines = readfile(s:tex_packages_data)
-				for entry in lines
+				let pkgs_list = readfile(s:tex_packages_data)
+				for entry in pkgs_list
 					if entry =~ '^' . escape(a:base, '\')
-						if !s:NextCharsMatch('^}')
-							" add trailing '}'
-							let entry = entry . '}'
-						endif
 						call add(suggestions, entry)
 					endif
 				endfor
@@ -111,10 +107,13 @@ function! TEXOMNI(findstart, base)  "{{{1
 			for tex in texfiles
 				let tex_c = substitute(tex,"^".curdir."/","","") 
 				if tex_c =~ '^'.a:base
+						if !s:NextCharsMatch('}')
+							let tex_c = tex_c . '}'
+						endif
 					call add(suggestions,tex_c)
 				endif
 			endfor
-		elseif text =~ '\\includegraphics\(\[[^\]]*\]\)*\_\s*{$'
+		elseif text =~ '\\includegraphics\(\[[^\]]*\]\)*\s*{'
 			let searchstr = '\(pdf\|jpg\|jpeg\|png\|eps\)'
 			let pictures1 = glob(curdir.'/*.'.b:glob_option.searchstr)
 			let pictures2 = glob(curdir.'/*/*.'.b:glob_option.searchstr)
@@ -122,10 +121,13 @@ function! TEXOMNI(findstart, base)  "{{{1
 			for pic in pictures
 				let pic_c = substitute(pic,"^".curdir."/","","")
 				if pic_c =~ '^'.a:base
+						if !s:NextCharsMatch('}')
+							let pic_c = tex_c . '}'
+						endif
 					call add(suggestions,"./".pic_c)
 				endif
 			endfor
-		elseif text =~ '\\includepdf\(merge\)\=\(\[[^\]]*\]\)*\_\s*{$'
+		elseif text =~ '\\includepdf\(merge\)\=\(\[[^\]]*\]\)*\s*{'
 			let searchstr = '\(png\|jpg\|jpeg\|eps\|pdf\|bmp\)'
 			"let pdffiles1 = globpath(curdir,searchstr)
 			"let pdffiles2 = globpath(curdir,'*/'.searchstr)
@@ -135,6 +137,9 @@ function! TEXOMNI(findstart, base)  "{{{1
 			for pdf in pdffiles
 				let pdf_c = substitute(pdf,"^".curdir."/","","")
 				if pdf_c =~ '^'.a:base
+						if !s:NextCharsMatch('}')
+							let pdf_c = tex_c . '}'
+						endif
 					call add(suggestions,"./".pdf_c)
 				endif
 			endfor
