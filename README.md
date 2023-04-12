@@ -10,3 +10,11 @@ It contains
 - (6) a plugin to insert latex commands and environments (~/.vim/ftplugin/tex/imaps.vim)
 - (7) a plugin to change environments (~/.vim/ftplugin/tex/env.vim)
 - (8) a plugin to complete \cite{ and \ref{ (~/.vim/ftplugin/tex/viewer.vim)
+
+Usage:
+![Screenshot_2023-04-06_18-19-09](https://user-images.githubusercontent.com/20554495/231387805-8bced491-4b10-445f-a3ba-c7fa561baa59.png)
+![Screenshot_2023-04-06_18-20-09](https://user-images.githubusercontent.com/20554495/231387859-59ba78c8-fbca-48cc-b20f-f6519d034ac2.png)
+![Screenshot_2023-04-06_18-22-35](https://user-images.githubusercontent.com/20554495/231387911-c28a4a94-ff59-4cb8-81e2-a7a6822ba865.png)
+![Screenshot_2023-04-06_18-24-00](https://user-images.githubusercontent.com/20554495/231387942-db4a804b-7aed-4ded-9424-e58a6f77b611.png)
+![Screenshot_2023-04-06_18-25-01](https://user-images.githubusercontent.com/20554495/231388000-c1ef0e73-d87b-4759-b388-ef635841bdef.png)
+![Screenshot_2023-04-06_18-26-15](https://user-images.githubusercontent.com/20554495/231388037-0c0ec5d4-7f0e-4ec2-b85b-570d933ca7ea.png)
