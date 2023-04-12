@@ -1,5 +1,5 @@
 # VimTeXtric
-##A collection of vim plugins for writing LaTeX. It contains 
+## A collection of vim plugins for writing LaTeX. It contains 
 - (0) an example of vimrc
 - (1) a colorscheme: parbermad.vim (~/.vim/colors/parbermad.vim), https://www.vim.org/scripts/script.php?script_id=6058
 - (2) a manual LaTeX fold plugin: tex_fold.vim (~/.vim/ftplugin/tex/fold.vim), https://www.vim.org/scripts/script.php?script_id=6057
@@ -10,7 +10,7 @@
 - (7) a plugin to change environments (~/.vim/ftplugin/tex/env.vim)
 - (8) a plugin to complete \cite{ and \ref{ (~/.vim/ftplugin/tex/viewer.vim)
 
-##Usage:
+## Usage:
 - (3) for the compile, in normal mode, press <F2> to run pdflatex, press <F6> to run xelatex, press <F8> to compile bibtex.
 - (4) for omni completion
 
