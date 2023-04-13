@@ -1,5 +1,5 @@
 "=============================================================================
-" 	     File: tex_compile.vim
+" 	     File: compile.vim
 "      Author: Yangqin Fang
 "       Email: fangyq09@gmail.com
 " 	  Version: 1.1 
@@ -11,10 +11,10 @@
 "  tex fils, for example chapter1.tex, chapter2.tex, ..., in any chapter, you
 "  press the shortcuts, it's all feasible.
 "=============================================================================
-if exists('b:tex_main_comp')
+if exists('b:vimtextric_compile')
 	finish
 endif
-let b:tex_main_comp = 1
+let b:vimtextric_compile = 1
 
 function! TeX_Outils_Vimgrep(filename,pattern) "{{{1
 	let fns = []
@@ -84,7 +84,8 @@ endfunction
 function! ZathuraSynctexForward(file)
   let source = expand("%:p")
   let input = shellescape(line(".").":".col(".").":".source)
-  let execstr = 'zathura -x "gvim --servername '.v:servername.' --remote-silent +\%{line} \%{input}" --synctex-forward='.input.' '.a:file.' &'
+  "let execstr = 'zathura -x "gvim --servername '.v:servername.' --remote-silent +\%{line} \%{input}" --synctex-forward='.input.' '.a:file.' &'
+  let execstr = 'zathura -x "gvim --servername '.v:servername.' --remote-silent +exec\\ \%{line} \%{input}" --synctex-forward='.input.' '.a:file.' &'
   silent call system(execstr)
 endfunction
 
