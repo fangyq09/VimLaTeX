@@ -150,13 +150,14 @@ function! TEXOMNI(findstart, base)  "{{{1
 		elseif text.com_prefix =~ '\\\(input\|include\)\_\s*{'.com_prefix
 			if com_prefix =~ '^\.'
 				let texfiles1 = glob('./*.'.b:glob_option.'tex')
+				let texfiles2 = glob('./*/*.'.b:glob_option.'tex')
 			else
 				let texfiles1 = glob('*.'.b:glob_option.'tex')
+				let texfiles2 = glob('*/*.'.b:glob_option.'tex')
 			endif
-			let texfiles2 = glob('./*/*.'.b:glob_option.'tex')
 			let texfiles = split(texfiles1, '\n') + split(texfiles2, '\n')
 			for tex in texfiles
-				let tex_c = substitute(tex,"^".curdir."/","","") 
+				"let tex_c = substitute(tex,"^".curdir."/","","") 
 				if tex_c =~ '^'.a:base
 					if !s:NextCharsMatch('}')
 						let tex_c = tex_c . '}'
@@ -168,10 +169,11 @@ function! TEXOMNI(findstart, base)  "{{{1
 			let searchstr = '\(pdf\|jpg\|jpeg\|png\|eps\|bmp\|svg\)'
 			if com_prefix =~ '^\.'
 				let pictures1 = glob('./*.'.b:glob_option.searchstr)
+				let pictures2 = glob('./*/*.'.b:glob_option.searchstr)
 			else
 				let pictures1 = glob('*.'.b:glob_option.searchstr)
+				let pictures2 = glob('*/*.'.b:glob_option.searchstr)
 			endif
-			let pictures2 = glob('./*/*.'.b:glob_option.searchstr)
 			let pictures = split(pictures1, '\n') + split(pictures2, '\n')
 			for pic in pictures
 				if pic =~ '^'.a:base
