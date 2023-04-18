@@ -54,6 +54,7 @@ function! TeX_Find_bibref_items(pattern,file,type)
 	exec 'silent! vimgrep! "'.a:pattern.'"j '.a:file
 	for i in getqflist()
 		let itext = i.text
+		let itext = substitute(itext,'\s\+',' ','g')
 		let ifilename = bufname(i.bufnr)
 		if a:file != '*.tex'
 			let next_line = bib_file[i.lnum]
@@ -147,8 +148,12 @@ function! TEXOMNI(findstart, base)  "{{{1
 				endfor
 			endif
 		elseif text.com_prefix =~ '\\\(input\|include\)\_\s*{'.com_prefix
-			let texfiles1 = glob(curdir.'/*.'.b:glob_option.'tex')
-			let texfiles2 = glob(curdir.'/*/*.'.b:glob_option.'tex')
+			if com_prefix =~ '^\.'
+				let texfiles1 = glob('./*.'.b:glob_option.'tex')
+			else
+				let texfiles1 = glob('*.'.b:glob_option.'tex')
+			endif
+			let texfiles2 = glob('./*/*.'.b:glob_option.'tex')
 			let texfiles = split(texfiles1, '\n') + split(texfiles2, '\n')
 			for tex in texfiles
 				let tex_c = substitute(tex,"^".curdir."/","","") 
