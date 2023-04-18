@@ -178,13 +178,20 @@ function! s:CompileBibTeX()
 		let b:tex_main_file_name = Find_Main_TeX_File()
 	endif
 	let l:tex_mfn = b:tex_main_file_name
+	if !exists('b:tex_bib_engine')  || (b:tex_bib_engine == '')
+		if search('\\addbibresource\s*{.\+}','cnw')
+			let b:tex_bib_engine = 'biber'
+		else
+			let b:tex_bib_engine = 'bibtex'
+		endif
+	endif
 	if l:tex_mfn != ''
 		let l:tex_mfwoe = substitute(l:tex_mfn,".tex$","","")
 	else
 		echomsg "no main file be found"
 		return
-	end
-	 exec "!bibtex ".l:tex_mfwoe
+	endif
+	 silent! exec '!'.b:tex_bib_engine.' '.l:tex_mfwoe
 endfunction
 "}}}1
 
