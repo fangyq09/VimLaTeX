@@ -181,7 +181,7 @@ function! TEXOMNI(findstart, base)  "{{{1
 					call add(suggestions,pic)
 				endif
 			endfor
-		elseif text.com_prefix =~ '\\cite\s*\(\[[^\]]*\]\)*\s*{\([^}]\)*'.com_prefix
+		elseif text.com_prefix =~ '\\\(\a\)*cite\(\a\)*\(\[[^\]]*\]\)*\s*{\([^}]\)*'.com_prefix
 			echomsg [text, com_prefix]
 			if !exists('b:tex_bib_name')
 				let b:tex_bib_name = TeX_Find_BiB_Source()
@@ -197,7 +197,7 @@ function! TEXOMNI(findstart, base)  "{{{1
 					endfor
 				endif
 			endif
-		elseif text.com_prefix =~ '\\\(ref\|eqref\|label\)\s*{'.com_prefix
+		elseif text.com_prefix =~ '\\\(ref\|eqref\|pageref\|label\)\s*{'.com_prefix
 			if exists('b:doc_class_line') && b:doc_class_line
 				let file_name = expand("%:p:t")
 			elseif search('\s*\\documentclass','cnw')
