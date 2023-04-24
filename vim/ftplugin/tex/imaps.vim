@@ -30,7 +30,7 @@ if !exists('g:tex_TEXIMAP')
 	let g:tex_TEXIMAP = 1
 endif
 
-"{{{1
+"{{{ commands
 let s:MapsComDict = {
 			\ 'align' : "\\begin{align}\<cr><++>&\\\\\<cr>&\<cr>\\end{align}",
 			\ 'aligned' : "\\begin{aligned}\<cr><++>&\\\\\<cr>&\<cr>\\end{aligned}",
@@ -116,7 +116,7 @@ let s:MapsComDict = {
 			\ 'Omega'   : "\\Omega",
 			\ '('   : "\\left(",
 			\ ')'   : "\\right)",
-			\ '(('   : "\\left(<++>\\right)",
+			\ '(('   : '\left(<++>\right)',
 			\ }
 "}}}
 
@@ -133,7 +133,7 @@ let s:Mapswordsabbrv = {
 			\ }
 "}}}
 
-"{{{
+"{{{ commands abbrv
 let s:Maps_commands_abbrv = {
 			\ 'a' : 'alpha',
 			\ 'b' : 'beta',
@@ -166,7 +166,7 @@ let s:Maps_commands_abbrv = {
 			\ }
 "}}}
 
-"{{{1
+"{{{ envs abbrv
 let s:Maps_envs_abbrv = {
 			\ 'al' : 'align',
 			\ 'ald' : 'aligned',
@@ -208,6 +208,7 @@ function! s:PutEnvironment() "{{{1
 	let colnum = col(".")-1
 	let line_text = getline(".")
 	let text_before = trim(line_text[0:colnum])
+	let ttb_len = len(text_before)
 	let stcn = colnum
 	while stcn > 0
 		let startp = strpart(line_text,stcn-1,1)
@@ -219,6 +220,9 @@ function! s:PutEnvironment() "{{{1
 		endif
 	endwhile
 	let word = strpart(line_text,stcn,colnum-stcn)
+	if word =~ '\W'
+		let word = substitute(word,'.*\(left(\|right)\)','','')
+	endif
 	if word != ''
 		if has_key(s:Mapsabbrv,word)  
 			let env =  get(s:Mapsabbrv,word)
@@ -226,20 +230,21 @@ function! s:PutEnvironment() "{{{1
 			let env = word
 		endif
 		""<C-g>u for an undo point
-		return "\<C-g>u\<C-r>=Tex_env_Debug('".word."','".env."','".text_before."')\<cr>"
+		"return "\<C-g>u\<C-r>=Tex_env_Debug('".word."','".env."')\<cr>"
+		return "\<C-g>u\<C-r>=Tex_env_Debug('".word."','".env."',".ttb_len.")\<cr>"
 	else
 		return ''
 	endif
 endfunction
 "}}}
 
-function! Tex_env_Debug(word,env,text) "{{{
+function! Tex_env_Debug(word,env,len) "{{{
 	let bkspc = substitute(a:word, '.', "\<bs>", "g")
 	if has_key(s:MapsDict,a:env)
 		let rhs = get(s:MapsDict,a:env)
-	elseif (a:env !~ '\W') && (a:text == a:word)
+	elseif (a:env !~ '\W') && (len(a:word) == a:len)
 		let rhs= "\\begin{".a:env."}\<cr><++>\<cr>\\end{".a:env."}"
-	elseif a:env[len(a:env)-1] == ')'
+	elseif a:word =~ '.*)$'
 		let rhs = strpart(a:env,0,len(a:env)-1)."\\right)"
 	else
 		let rhs = a:env
@@ -311,12 +316,11 @@ endfunction
 function! PutTextWithMovement(str,...) "{{{1
 	if a:0 > 0
 		let movement = "\<esc>".a:1."a"
+	elseif a:str =~ '<++>'
+		"let movement = "\<esc>?<++>\<cr>".'"_4s'
+		let movement = "\<esc>?<++>\<cr>:call\ TeX_Outils_RLHI()\<cr>".'"_4s'
 	else
-		if a:str =~ '<++>'
-			let movement = "\<esc>?<++>\<cr>:call TeX_Outils_RLHI()\<cr>".'"_4s'
-		else
-			let movement = ''
-		endif
+		let movement = ''
 	endif
 	return a:str.movement
 endfunction
@@ -326,6 +330,7 @@ endfunction
 function! TeX_Outils_RLHI()
 	call histdel("/", -1)
 	let @/ = histget("/", -1)
+	return ''
 endfunction
 
 if g:tex_TEXIMAP
