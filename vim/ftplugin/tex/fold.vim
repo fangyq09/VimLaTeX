@@ -20,7 +20,7 @@ if exists('b:VimLaTeX_folding')
 endif
 let b:VimLaTeX_folding = 1
 
-let s:save_cpo = &cpo
+let save_cpo = &cpo
 set cpo&vim
 augroup LatexSuite
 	au LatexSuite User LatexSuiteFileType 
@@ -58,7 +58,7 @@ let s:class_book = ['book', 'report', 'memoir', 'amsbook', 'minibook', 'scrbook'
 let s:tex_fold_envs_thm = ['theorem', 'prop', 'lem', 'cor', 'def', 'thm',
  		\ 'proof', 'remark', 'abstract', 'nthm', 'algorithm',
 		\ 'example', 'exercise', 'problem', 'question', 'solution']
-let s:tex_fold_envs_sp= ['verbatim', 'biblist', 'thebibliography'] 
+let s:tex_fold_envs_sp= ['verbatim', 'biblist', 'lstlisting', 'thebibliography'] 
 let s:tex_fold_envs_tab = ['table', 'tabular', 'tabbing']
 let s:tex_fold_envs_list = ['enumerate', 'itemize', 'description']
 let s:tex_fold_envs_fig = ['picture', 'figure', 'tikzpicture']
@@ -77,6 +77,7 @@ let s:tex_fold_envs_names = s:tex_fold_envs_thm + s:tex_fold_envs_sp
 let s:tex_env_names = join(s:tex_fold_envs_names,'\|')
 let s:tex_env_patterns = '\(\(begin\|end\)\s*{\s*\('.s:tex_env_names.'\)\)'
 let s:tex_sect_patterns = '\('.join(s:tex_fold_sect_key_words,'\|').'\)'
+
 
 function! TeX_Fold_Force() "{{{1
 	if g:tex_fold_override_foldtext
@@ -390,6 +391,6 @@ endfunction
 
 silent! do LatexSuite User LatexSuiteFileType
 
-let &cpo = s:save_cpo
+let &cpo = save_cpo
 
 " vim:fdm=marker:noet:ff=unix
