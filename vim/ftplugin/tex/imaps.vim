@@ -31,7 +31,7 @@ if !exists('g:tex_TEXIMAP')
 endif
 
 "{{{1
-let s:MapsDict = {
+let s:MapsComDict = {
 			\ 'align' : "\\begin{align}\<cr><++>&\\\\\<cr>&\<cr>\\end{align}",
 			\ 'aligned' : "\\begin{aligned}\<cr><++>&\\\\\<cr>&\<cr>\\end{aligned}",
 			\ 'array' : "\\left\<cr>\\begin{array}{<++>}\<cr>\<cr>\\end{array}\<cr>\\right",
@@ -43,23 +43,28 @@ let s:MapsDict = {
 			\ 'cas' : "\\begin{cases}\<cr><++>\<cr>\\end{cases}",
 			\ 'cball' : "\\cball",
 			\ 'cite' : "\\cite{<++>}",
+			\ 'dfrac' : "\\dfrac{<++>}{}",
 			\ 'enumerate' : "\\begin{enumerate}\<cr>\\item <++>\<cr>\\end{enumerate}",
 			\ 'eqref' : "\\eqref{eq:<++>}",
 			\ 'exp' : "\\exp\\left(<++>\\right)",
 			\ 'frac' : "\\frac{<++>}{}",
 			\ 'frak' : "\\mathfrak{<++>}",
 			\ 'figure' :  "\\begin{figure}[H]\<cr>\\centering\<cr>"
-			\ ."\\includegraphics[width=\\textwidth]{<++>.eps}\<cr>"
+			\ ."\\includegraphics[width=\\textwidth]{<++>.pdf}\<cr>"
 			\ ."\\caption{}\<cr>\\label{fig:}\<cr>\\end{figure}",
 			\ 'int' : "\\int_{<++>}^{}",
 			\ 'ip' : "\\langle <++> \\rangle",
 			\ 'itemize' : "\\begin{itemize}\<cr>\\item <++>\<cr>\\end{itemize}",
 			\ 'label' : "\\label{<++>}",
 			\ 'lr' : "\\left<++>\\right",
+			\ 'lst' : "\\begin{lstlisting}[language=bash,breaklines]\<cr><++>\<cr>"
+			\ ."\\end{lstlisting}",
+			\ 'm' : "\\[\<cr><++>\<cr>\\]",
 			\ 'minipage'  : "\\begin{minipage}[t]{<++>cm}\<cr>\\end{minipage}",
 			\ 'mbox'  : "\\mbox{<++>}",
-			\ 'open'  : "\\oball",
 			\ 'overline'  : "\\overline{<++>}",
+			\ 'pic'  : "\\begin{center}\<cr>\\includegraphics[width=\\textwidth]"
+			\ ."{<++>}\<cr>\\end{center}",
 			\ 'real' : "\\mathbb{R}",
 			\ 'ref' : "\\ref{<++>}",
 			\ 'rn' : "\\mathbb{R}^n",
@@ -109,20 +114,34 @@ let s:MapsDict = {
 			\ 'Sigma'   : "\\Sigma",
 			\ 'Upsilon' : "\\Upsilon",
 			\ 'Omega'   : "\\Omega",
-			\ 'Thm'   : "Theorem \\ref{thm:<++>}",
-			\ 'Cor'   : "Corollary \\ref{co<++>}",
-			\ 'Prop'   : "Proposition \\ref{prop:<++>}",
-			\ 'Le'   : "Lemma \\ref{le:<++>}" 
+			\ '('   : "\\left(",
+			\ ')'   : "\\right)",
+			\ '(('   : "\\left(<++>\\right)",
 			\ }
 "}}}
 
-"{{{1
+"{{{ words abbrv
+let s:Mapswordsabbrv = {
+			\ 'lip'     : 'Lipschitz',
+			\ 'ffp'     : 'Federer Fleming projection',
+			\ 'st'      : 'such that',
+			\ 'lnr'     : 'Lipschitz neighborhood retract',
+			\ 'nbh'     : 'neighborhood',
+			\ 'nhb'     : 'neighborhood',
+			\ 'cech'    : '\v{C}ech',
+			\ 'holder'    : 'H\"older',
+			\ }
+"}}}
+
+"{{{
 let s:Maps_commands_abbrv = {
 			\ 'a' : 'alpha',
 			\ 'b' : 'beta',
 			\ 'd' : 'delta',
+			\ 'df' : 'dfrac',
 			\ 'D' : 'Delta',
 			\ 'e' : 'epsilon',
+			\ 'f' : 'frac',
 			\ 'er' : 'eqref',
 			\ 'g' : 'gamma',
 			\ 'G' : 'Gamma',
@@ -143,7 +162,7 @@ let s:Maps_commands_abbrv = {
 			\ 'u' : 'upsilon',
 			\ 'ul' : 'underline',
 			\ 'U' : 'Upsilon',
-			\ 'z' : 'zeta'
+			\ 'z' : 'zeta',
 			\ }
 "}}}
 
@@ -179,6 +198,7 @@ let s:Maps_envs_abbrv = {
 			\ }
 "}}}
 
+let s:MapsDict = extend(s:MapsComDict,s:Mapswordsabbrv)
 let s:Mapsabbrv = extend(s:Maps_commands_abbrv,s:Maps_envs_abbrv)
 
 inoremap <buffer> <C-l>		 <C-r>=<SID>PutEnvironment()<CR>
@@ -186,17 +206,19 @@ inoremap <buffer> <C-l>		 <C-r>=<SID>PutEnvironment()<CR>
 function! s:PutEnvironment() "{{{1
 	let linenum = line(".")
 	let colnum = col(".")-1
-	let line = getline(".")
+	let line_text = getline(".")
+	let text_before = trim(line_text[0:colnum])
 	let stcn = colnum
 	while stcn > 0
-		let startp = strpart(line,stcn-1,1)
-		if startp =~ '\W'
+		let startp = strpart(line_text,stcn-1,1)
+		"if startp =~ '\W'
+		if startp =~ '[^0-9A-Za-z()]'
 			break
 		else
 		let stcn = stcn - 1
 		endif
 	endwhile
-	let word = strpart(line,stcn,colnum-stcn)
+	let word = strpart(line_text,stcn,colnum-stcn)
 	if word != ''
 		if has_key(s:Mapsabbrv,word)  
 			let env =  get(s:Mapsabbrv,word)
@@ -204,17 +226,23 @@ function! s:PutEnvironment() "{{{1
 			let env = word
 		endif
 		""<C-g>u for an undo point
-		return "\<C-g>u\<C-r>=Tex_env_Debug('".word."','".env."')\<cr>"
+		return "\<C-g>u\<C-r>=Tex_env_Debug('".word."','".env."','".text_before."')\<cr>"
+	else
+		return ''
 	endif
 endfunction
 "}}}
 
-function! Tex_env_Debug(word,env) "{{{
+function! Tex_env_Debug(word,env,text) "{{{
 	let bkspc = substitute(a:word, '.', "\<bs>", "g")
 	if has_key(s:MapsDict,a:env)
 		let rhs = get(s:MapsDict,a:env)
-	else
+	elseif (a:env !~ '\W') && (a:text == a:word)
 		let rhs= "\\begin{".a:env."}\<cr><++>\<cr>\\end{".a:env."}"
+	elseif a:env[len(a:env)-1] == ')'
+		let rhs = strpart(a:env,0,len(a:env)-1)."\\right)"
+	else
+		let rhs = a:env
 	endif
 	let events = PutTextWithMovement(rhs)
 	return bkspc.events
@@ -287,7 +315,7 @@ function! PutTextWithMovement(str,...) "{{{1
 		if a:str =~ '<++>'
 			let movement = "\<esc>?<++>\<cr>:call TeX_Outils_RLHI()\<cr>".'"_4s'
 		else
-			let movement = ""
+			let movement = ''
 		endif
 	endif
 	return a:str.movement
@@ -319,7 +347,7 @@ call TEXIMAP("`~","\\widetilde{<++>}")
 call TEXIMAP("`^","\\widehat{<++>}")
 call TEXIMAP('`\',"\\setminus")
 call TEXIMAP('`e',"\\emptyset")
-call TEXIMAP('\[',"\\[\<cr><++>\<cr>\\]")
+"call TEXIMAP('\[',"\\[\<cr><++>\<cr>\\]")
 call TEXIMAP('\{',"\\{<++>\\}")
 call TEXIMAP('\(',"\\(<++>\\)")
 call TEXIMAP('`/',"\\frac{<++>}{}")
@@ -340,6 +368,12 @@ let s:KeyWDict = {
 			\ 'injto' : '\hookrightarrow', 
 			\ 'wc' : '\rightharpoonup', 
 			\ 'uc' : '\rightrightarrows', 
+			\ 'Thm'   : "Theorem \\ref{thm:<++>}",
+			\ 'Cor'   : "Corollary \\ref{co<++>}",
+			\ 'Prop'   : "Proposition \\ref{prop:<++>}",
+			\ 'Le'   : "Lemma \\ref{le:<++>}",
+			\ 'article' : "\\documentclass[12pt,a4paper]{article}\<cr>"
+			\ ."\\begin{document}\<cr><++>\<cr>\\end{document}"
 			\ }
 inoremap <buffer> <C-i>		 <C-r>=<SID>PutEnv()<CR>
 function! s:PutEnv() "{{{1
