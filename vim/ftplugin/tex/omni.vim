@@ -7,11 +7,11 @@
 " 
 "  Description: An omni completion of LaTeX
 "=============================================================================
-if exists('b:tex_omni')
+if exists('b:loaded_vimtextric_omni')
 	finish
 endif
+let b:loaded_vimtextric_omni = 1
 
-let b:tex_omni = 1
 if has('unix')
 	let b:glob_option = '\c'
 else 
@@ -19,11 +19,36 @@ else
 endif
 
 let s:completiondatadir=expand("<sfile>:p:h") ."/completion/"
-let s:tex_unicode =s:completiondatadir . "unicodemath.txt"
-let s:tex_commands =s:completiondatadir . "commands.txt"
-let s:tex_env_data =s:completiondatadir . "environments.txt"
-let s:tex_packages_data =s:completiondatadir . "packages.txt"
-let s:tex_fonts_data =s:completiondatadir . "fonts.txt"
+let s:tex_unicode_file =s:completiondatadir . "unicodemath.txt"
+let s:tex_commands_file =s:completiondatadir . "commands.txt"
+let s:tex_env_data_file =s:completiondatadir . "environments.txt"
+let s:tex_packages_data_file =s:completiondatadir . "packages.txt"
+let s:tex_fonts_data_file =s:completiondatadir . "fonts.txt"
+if filereadable(s:tex_commands_file)
+	let s:tex_commands = readfile(s:tex_commands_file)
+else
+let s:tex_commands = []
+endif
+if filereadable(s:tex_unicode_file)
+	let s:tex_unicode = readfile(s:tex_unicode_file)
+else
+let s:tex_unicode = []
+endif
+if filereadable(s:tex_env_data_file)
+	let s:tex_env_data = readfile(s:tex_env_data_file)
+else 
+let s:tex_env_data = []
+endif
+if filereadable(s:tex_commands_file)
+	let s:tex_packages_data = readfile(s:tex_packages_data_file)
+else
+	let s:tex_packages_data = []
+endif
+if filereadable(s:tex_fonts_data_file)
+	let s:tex_fonts_data = readfile(s:tex_fonts_data_file)
+else
+	let s:tex_fonts_data = []
+endif
 
 function! s:NextCharsMatch(regex)
 	let rest_of_line = strpart(getline('.'), col('.') - 1)
@@ -103,18 +128,15 @@ function! TEXOMNI(findstart, base)  "{{{1
 		let com_prefix = escape(a:base, '\')
 		if com_prefix =~ '^\\.*'
 			" suggest known commands
-			if filereadable(s:tex_commands) || filereadable(s:tex_unicode)
-				let com_list = extend(readfile(s:tex_commands),readfile(s:tex_unicode))
+				let com_list = extend(s:tex_commands,s:tex_unicode)
 				for entry in com_list
 					if entry =~ '^' . escape(a:base, '\')
 						call add(suggestions, entry)
 					endif
 				endfor
-			endif
 		elseif text =~ '\\\(begin\|end\)\s*{'
 			" suggest known environments
-			if filereadable(s:tex_env_data)
-				let env_list = readfile(s:tex_env_data)
+				let env_list = s:tex_env_data
 				for entry in env_list
 					if entry =~ '^' . escape(a:base, '\')
 						if !s:NextCharsMatch('}')
@@ -123,11 +145,9 @@ function! TEXOMNI(findstart, base)  "{{{1
 						call add(suggestions, entry)
 					endif
 				endfor
-			endif
 		elseif text =~ '\\set\(CJK\)\=\(main\|sans\|mono\|math\|family\)font\(\[[^\]]*\]\)*\s*\(\[\|{\)'
 			" suggest known environments
-			if filereadable(s:tex_fonts_data)
-				let font_list = readfile(s:tex_fonts_data)
+				let font_list = s:tex_fonts_data
 				for entry in font_list
 					if entry =~ '^' . escape(a:base, '\')
 						if !s:NextCharsMatch('}') && (line[b:omni_start_pos - 1] == '{')
@@ -136,18 +156,15 @@ function! TEXOMNI(findstart, base)  "{{{1
 						call add(suggestions, entry)
 					endif
 				endfor
-			endif
 		elseif text =~ '\\\(usepackage\|RequirePackage\)\(\[[^\]]*\]\)*\s*{'
 			" suggest known environments
-			if filereadable(s:tex_packages_data)
-				let pkgs_list = readfile(s:tex_packages_data)
+				let pkgs_list = s:tex_packages_data
 				for entry in pkgs_list
 					if entry =~ '^' . escape(a:base, '\')
 						call add(suggestions, entry)
 					endif
 				endfor
-			endif
-		elseif text.com_prefix =~ '\\\(input\|include\)\_\s*{'.com_prefix
+		elseif text.com_prefix =~ '\\\(input\|include\)\s*{'.com_prefix
 			if com_prefix =~ '^\.'
 				let texfiles1 = glob('./*.'.b:glob_option.'tex')
 				let texfiles2 = glob('./*/*.'.b:glob_option.'tex')
@@ -157,12 +174,12 @@ function! TEXOMNI(findstart, base)  "{{{1
 			endif
 			let texfiles = split(texfiles1, '\n') + split(texfiles2, '\n')
 			for tex in texfiles
-				"let tex_c = substitute(tex,"^".curdir."/","","") 
-				if tex_c =~ '^'.a:base
+				"let tex = substitute(tex,"^".curdir."/","","") 
+				if tex =~ '^'.a:base
 					if !s:NextCharsMatch('}')
-						let tex_c = tex_c . '}'
+						let tex = tex . '}'
 					endif
-					call add(suggestions,tex_c)
+					call add(suggestions,tex)
 				endif
 			endfor
 		elseif text =~ '\\include\(graphics\|pdf\|pdfmerge\|svg\)\(\[[^\]]*\]\)*\s*{'
@@ -184,7 +201,6 @@ function! TEXOMNI(findstart, base)  "{{{1
 				endif
 			endfor
 		elseif text.com_prefix =~ '\\\(\a\)*cite\(\a\)*\(\[[^\]]*\]\)*\s*{\([^}]\)*'.com_prefix
-			echomsg [text, com_prefix]
 			if !exists('b:tex_bib_name')
 				let b:tex_bib_name = TeX_Find_BiB_Source()
 			endif
