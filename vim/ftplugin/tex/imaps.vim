@@ -21,50 +21,63 @@
 "  lot delay when typing (),{},[].
 "=============================================================================
 
-if exists("g:loaded_teximaps")
+if exists("g:loaded_vimtextric_imaps")
 	finish
 endif
-let g:loaded_teximaps = 1
+let g:loaded_vimtextric_imaps = 1
 
-if !exists('g:tex_TEXIMAP')
-	let g:tex_TEXIMAP = 1
+if !exists('g:vimtextric_TEXIMAP')
+	let g:vimtextric_TEXIMAP = 1
 endif
 
-"{{{ commands
-let s:MapsComDict = {
+"{{{ envs
+let s:MapsEnvDict = {
 			\ 'align' : "\\begin{align}\<cr><++>&\\\\\<cr>&\<cr>\\end{align}",
 			\ 'aligned' : "\\begin{aligned}\<cr><++>&\\\\\<cr>&\<cr>\\end{aligned}",
-			\ 'array' : "\\left\<cr>\\begin{array}{<++>}\<cr>\<cr>\\end{array}\<cr>\\right",
+			\ 'array' : "\\begin{array}{<++>}\<cr>\<cr>\\end{array}",
+			\ 'cas' : "\\begin{cases}\<cr><++>\<cr>\\end{cases}",
+			\ 'CJK' : "\\begin{CJK*}{UTF8}{gbsn}\<cr><++>\<cr>\\end{CJK*}",
+			\ 'enumerate' : "\\begin{enumerate}[label=(\\arabic*)]\<cr>\\item"
+			\ ."<++>\<cr>\\end{enumerate}",
+			\ 'equation' : "\\begin{equation}\\label{<++>}\<cr>\\end{equation}",
+			\ 'figure' :  "\\begin{figure}[H]\<cr>\\centering\<cr>"
+			\ ."\\includegraphics[width=\\textwidth]{<++>.pdf}\<cr>"
+			\ ."\\caption{}\<cr>\\label{fig:}\<cr>\\end{figure}",
+			\ 'itemize' : "\\begin{itemize}\<cr>\\item <++>\<cr>\\end{itemize}",
+			\ 'lst' : "\\begin{lstlisting}[language=bash,breaklines]\<cr><++>\<cr>"
+			\ ."\\end{lstlisting}",
+			\ 'm' : "\\[\<cr><++>\<cr>\\]",
+			\ 'minipage'  : "\\begin{minipage}[t]{<++>cm}\<cr>\\end{minipage}",
+			\ 'pic'  : "\\begin{center}\<cr>\\includegraphics[width=\\textwidth]"
+			\ ."{<++>}\<cr>\\end{center}",
+			\ 'table' : "\\begin{table}\<cr>\\centering\<cr>"
+			\ ."\\caption{tab:}\<cr>\\begin{tabular}{<++>}\<cr>\<cr>"
+			\ ."\\end{tabular}\<cr>\\label{tab:}\<cr>\\end{table}",
+			\ 'tabular': "\\begin{tabular}{<++>}\<cr>\\end{tabular}",
+			\ 'tikzpicture'  : "\\begin{tikzpicture}[thick, scale=2]\<cr><++>"
+			\ ."\<cr>\\end{tikzpicture}",
+			\ }
+"}}}
+"{{{ commands
+let s:MapsComDict = {
 			\ 'av' : "\\left|\<++> \\right|",
 			\ 'bb' : "\\mathbb{<++>}",
 			\ 'bf' : "\\mathbf{<++>}",
 			\ 'bk' : "\llbracket <++>\rrbracket",
 			\ 'cal' : "\\mathcal{<++>}",
-			\ 'cas' : "\\begin{cases}\<cr><++>\<cr>\\end{cases}",
 			\ 'cball' : "\\cball",
 			\ 'cite' : "\\cite{<++>}",
 			\ 'dfrac' : "\\dfrac{<++>}{}",
-			\ 'enumerate' : "\\begin{enumerate}\<cr>\\item <++>\<cr>\\end{enumerate}",
 			\ 'eqref' : "\\eqref{eq:<++>}",
 			\ 'exp' : "\\exp\\left(<++>\\right)",
 			\ 'frac' : "\\frac{<++>}{}",
 			\ 'frak' : "\\mathfrak{<++>}",
-			\ 'figure' :  "\\begin{figure}[H]\<cr>\\centering\<cr>"
-			\ ."\\includegraphics[width=\\textwidth]{<++>.pdf}\<cr>"
-			\ ."\\caption{}\<cr>\\label{fig:}\<cr>\\end{figure}",
 			\ 'int' : "\\int_{<++>}^{}",
 			\ 'ip' : "\\langle <++> \\rangle",
-			\ 'itemize' : "\\begin{itemize}\<cr>\\item <++>\<cr>\\end{itemize}",
 			\ 'label' : "\\label{<++>}",
 			\ 'lr' : "\\left<++>\\right",
-			\ 'lst' : "\\begin{lstlisting}[language=bash,breaklines]\<cr><++>\<cr>"
-			\ ."\\end{lstlisting}",
-			\ 'm' : "\\[\<cr><++>\<cr>\\]",
-			\ 'minipage'  : "\\begin{minipage}[t]{<++>cm}\<cr>\\end{minipage}",
 			\ 'mbox'  : "\\mbox{<++>}",
 			\ 'overline'  : "\\overline{<++>}",
-			\ 'pic'  : "\\begin{center}\<cr>\\includegraphics[width=\\textwidth]"
-			\ ."{<++>}\<cr>\\end{center}",
 			\ 'real' : "\\mathbb{R}",
 			\ 'ref' : "\\ref{<++>}",
 			\ 'rn' : "\\mathbb{R}^n",
@@ -76,13 +89,9 @@ let s:MapsComDict = {
 			\ 'scr' : "\\mathscr{<++>}",
 			\ 'sum'  : "\\sum_{<++>}^{}",
 			\ 'suml' : "\\sum\\limits_{<++>}^{}",
-			\ 'tabular' : "\\begin{table}\<cr>\\centering\<cr>"
-			\ ."\\caption{tab:}\<cr>\\begin{tabular}{<++>}\<cr>\<cr>"
-			\ ."\\end{tabular}\<cr>\\label{tab:}\<cr>\\end{table}",
 			\ 'text' : "\\text{<++>}",
-			\ 'tikzpicture'  : "\\begin{tikzpicture}[thick, scale=2]\<cr><++>"
-			\ ."\<cr>\\end{tikzpicture}",
 			\ 'tw' : "\\textwidth",
+			\ 'tss' : "\\textsuperscript{<++>}",
 			\ 'vli' : "\\varliminf_{<++>}",
 			\ 'vls' : "\\varlimsup_{<++>}",
 			\ 've' : "\\varepsilon",
@@ -198,12 +207,13 @@ let s:Maps_envs_abbrv = {
 			\ }
 "}}}
 
-let s:MapsDict = extend(s:MapsComDict,s:Mapswordsabbrv)
-let s:Mapsabbrv = extend(s:Maps_commands_abbrv,s:Maps_envs_abbrv)
+let s:MapsEnvComDict = extend(copy(s:MapsEnvDict),copy(s:MapsComDict))
+let s:MapsDict = extend(copy(s:MapsEnvComDict),copy(s:Mapswordsabbrv))
+let s:Mapsabbrv = extend(copy(s:Maps_commands_abbrv),copy(s:Maps_envs_abbrv))
 
 inoremap <buffer> <C-l>		 <C-r>=<SID>PutEnvironment()<CR>
 
-function! s:PutEnvironment() "{{{1
+function! s:PutEnvironment() "{{{
 	let linenum = line(".")
 	let colnum = col(".")-1
 	let line_text = getline(".")
@@ -212,7 +222,6 @@ function! s:PutEnvironment() "{{{1
 	let stcn = colnum
 	while stcn > 0
 		let startp = strpart(line_text,stcn-1,1)
-		"if startp =~ '\W'
 		if startp =~ '[^0-9A-Za-z()]'
 			break
 		else
@@ -242,12 +251,15 @@ function! Tex_env_Debug(word,env,len) "{{{
 	let bkspc = substitute(a:word, '.', "\<bs>", "g")
 	if has_key(s:MapsDict,a:env)
 		let rhs = get(s:MapsDict,a:env)
+		if has_key(s:MapsEnvDict,a:word) && (a:len > len(a:word))
+			let rhs = "\<cr>".rhs
+		endif
 	elseif (a:env !~ '\W') && (len(a:word) == a:len)
 		let rhs= "\\begin{".a:env."}\<cr><++>\<cr>\\end{".a:env."}"
 	elseif a:word =~ '.*)$'
 		let rhs = strpart(a:env,0,len(a:env)-1)."\\right)"
 	else
-		let rhs = a:env
+		let rhs = a:word
 	endif
 	let events = PutTextWithMovement(rhs)
 	return bkspc.events
@@ -333,7 +345,7 @@ function! TeX_Outils_RLHI()
 	return ''
 endfunction
 
-if g:tex_TEXIMAP
+if g:vimtextric_TEXIMAP
 call TEXIMAP("__","_{<++>}")
 call TEXIMAP("^^","^{<++>}")
 call TEXIMAP("$$","$<++>$")
@@ -377,11 +389,11 @@ let s:KeyWDict = {
 			\ 'Cor'   : "Corollary \\ref{co<++>}",
 			\ 'Prop'   : "Proposition \\ref{prop:<++>}",
 			\ 'Le'   : "Lemma \\ref{le:<++>}",
-			\ 'article' : "\\documentclass[12pt,a4paper]{article}\<cr>"
+			\ 'article' : "\\documentclass[12pt]{article}\<cr>"
 			\ ."\\begin{document}\<cr><++>\<cr>\\end{document}"
 			\ }
 inoremap <buffer> <C-i>		 <C-r>=<SID>PutEnv()<CR>
-function! s:PutEnv() "{{{1
+function! s:PutEnv() "{{{
 	let key_word = input('Insert Env: ')
 	if key_word == ''
 		let events = ''
