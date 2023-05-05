@@ -15,10 +15,10 @@
 "  it will insert the selected template after the cursor line.
 "  3. You can put your own templates in dir ~/.vim/ftplugin/tex/template/
 "=============================================================================
-if exists('b:tex_tamplate')
+if exists('b:loaded_vimtextric_tamplate')
 	finish
 endif
-let b:tex_template = 1
+let b:loaded_vimtextric_template = 1
 
 let s:templatedatadir=expand("<sfile>:p:h")."/template/"
 
@@ -34,8 +34,17 @@ endfunction
 
 function! InsertTeXTemplates(type)
 	let cur_line_num = line(".")
+	if a:type == 'tex' && search('^\s*\\documentclass','cnw')
+		let answer = confirm("This document already has a header file. Do you insist on importing the template?", "&Yes\n&No", 1)
+	else
+		let answer = 1
+	endif
 	if a:type == 'tex'
-		let temp_list = glob(s:templatedatadir.'*.tex')
+		if answer == 1
+			let temp_list = glob(s:templatedatadir.'*.tex')
+		else
+			return ''
+		endif
 	elseif a:type == 'text'
 		let temp_list = glob(s:templatedatadir.'*.txt')
 	endif
@@ -57,9 +66,10 @@ function! InsertTeXTemplates(type)
 	else
 		echo 'No templates be found!'
 	endif
+	return ''
 endfunction
 
 nmap <F1> <nop>
 imap <F1> <nop>
-nmap <silent><buffer><F1> :call InsertTeXTemplates('tex')<CR>
-nmap <buffer><F12> :call InsertTeXTemplates('text')<CR>
+nmap <silent><buffer><F1>  :call InsertTeXTemplates('tex')<CR>
+nmap <silent><buffer><F11> :call InsertTeXTemplates('text')<CR>
