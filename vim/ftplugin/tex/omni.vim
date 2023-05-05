@@ -50,6 +50,8 @@ else
 	let s:tex_fonts_data = []
 endif
 
+call extend(s:tex_commands,s:tex_unicode)
+
 function! s:NextCharsMatch(regex)
 	let rest_of_line = strpart(getline('.'), col('.') - 1)
 	return rest_of_line =~ a:regex
@@ -128,7 +130,7 @@ function! TEXOMNI(findstart, base)  "{{{1
 		let com_prefix = escape(a:base, '\')
 		if com_prefix =~ '^\\.*'
 			" suggest known commands
-				let com_list = extend(s:tex_commands,s:tex_unicode)
+				let com_list = s:tex_commands
 				for entry in com_list
 					if entry =~ '^' . escape(a:base, '\')
 						call add(suggestions, entry)
