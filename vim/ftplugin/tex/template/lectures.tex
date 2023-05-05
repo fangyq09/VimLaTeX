@@ -8,15 +8,15 @@
 \RequirePackage{mathtools}
 \mathtoolsset{showonlyrefs}% for hiding unused labels
 \RequirePackage[scaled=0.92]{helvet}	% set Helvetica as the sans-serif font
-\renewcommand{\rmdefault}{ptm}		% set Times as the default text font
+\RequirePackage{tgtermes}% set Times as the default text font
 %\RequirePackage{mathabx}% fonts for symbols
 %\usepackage[italic]{mathastext}
 \usepackage[lite]{mtpro2}
 \RequirePackage[cal=esstix,scr=rsfs,bb=ams,frak=euler]{mathalfa}
 \RequirePackage{enumitem}
-\setenumerate[1]{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
-\setitemize[1]{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
-\setdescription{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
+\setenumerate{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt, labelindent=1em}
+\setitemize{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt, leftmargin=2pc}
+\setdescription{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt, labelindent=1em}
 \RequirePackage[obeyFinal,textsize=scriptsize,shadow]{todonotes}
 \RequirePackage{graphicx}
 \RequirePackage{float}
@@ -24,6 +24,7 @@
 \RequirePackage{hyperref}
 \hypersetup{
 	hyperindex,
+	unicode=true,
 	plainpages=false,
 	bookmarks=true,
 	bookmarksopen=true,

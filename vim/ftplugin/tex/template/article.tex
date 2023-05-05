@@ -1,5 +1,4 @@
-\documentclass[a4paper,12pt,reqno]{amsart}
-\usepackage[utf8x]{inputenc}
+\documentclass[12pt,reqno]{amsart}
 %\usepackage[english,french]{babel}
 \usepackage[T1]{fontenc}
 \usepackage[a4paper,includeheadfoot,margin=2.54cm]{geometry}
@@ -10,21 +9,33 @@
 \usepackage{xcolor}
 %%========================================================================
 \usepackage{enumitem}
-\setenumerate[1]{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
-\setitemize[1]{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
+\setenumerate{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
+\setitemize{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
 \setdescription{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
 %%========================================================================
-%\usepackage{times}%times as default text fonts
-\usepackage[scaled=.92]{helvet} %set Helvetica as the sans-serif font
-\renewcommand{\rmdefault}{ptm}	% set Times as the default text font
-\usepackage{mathabx}% fonts for symbols,load before amsrefs
-%\usepackage{amssymb}%mathbb
-%\usepackage{mathrsfs}%mathscr
-\usepackage[cal=esstix,scr=rsfs,bb=ams,frak=euler]{mathalfa}
+\usepackage[scaled=0.9]{helvet} %set Helvetica as the sans-serif font
+\usepackage{tgtermes}%times as default text fonts
+%-------------------------------------------------------------------------
+\usepackage{mathabx}% fonts for symbols
+\usepackage[scr=rsfso,bb=ams,frak=euler]{mathalpha}
+%-------------------------------------------------------------------------
+%\usepackage{libertinust1math}% fonts for symbols
+%\usepackage[intlimits]{esint}% fonts for integrals
+%\usepackage[cal=esstix,scr=boondox,bb=ams,frak=euler]{mathalpha}
+%-------------------------------------------------------------------------
+%\usepackage{newtxtext} %times as default text fonts
+%\usepackage{newtxmath} %fonts for symbols
+%\usepackage{esint}% fonts for integrals
+%\usepackage[cal=euler,frak=euler]{mathalfa}
+%-------------------------------------------------------------------------
+%%\usepackage{stix2}% fonts for both text and symbols
+%\usepackage[notext]{stix2}% fonts for only symbols
+%\usepackage[bb=ams,frak=euler]{mathalfa}
 %%========================================================================
 \usepackage{amsrefs}
 \usepackage{graphicx}
 \usepackage[
+unicode=true,
 colorlinks=true,
 linkcolor=purple,
 citecolor=blue,
@@ -68,6 +79,7 @@ Code, City, Country\strut}}
 	In this paper, ...
 \end{abstract}
 \maketitle
+\thispagestyle{empty}
 
 \section{Introduction}
 \section{Preliminary}

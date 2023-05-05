@@ -1,0 +1,18 @@
+
+\RequirePackage{amsthm}
+\theoremstyle{definition}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{corollary}[theorem]{推论}
+\newtheorem{lemma}[theorem]{引理}
+\newtheorem{proposition}[theorem]{命题}
+\newtheorem{definition}[theorem]{定义}
+\newtheorem{question}{问题}
+\newtheorem{problem}{题}
+\newtheorem{conjecture}{猜想}
+\newtheorem{algorithm}{算法}
+\newtheorem{example}[theorem]{例}
+\theoremstyle{remark}
+\newtheorem{remark}[theorem]{注}
+\numberwithin{equation}{section}
+%Convenient Environments
+\newenvironment{solution}{\begin{proof}[解：\nopunct]}{\end{proof}}

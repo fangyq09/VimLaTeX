@@ -2,6 +2,7 @@
 \RequirePackage{geometry}
 \geometry{a4paper,includeheadfoot,margin=2.54cm}
 %%========================================================================
+\RequirePackage[T1]{fontenc}
 \RequirePackage{xcolor}
 %\RequirePackage{amsmath}
 \RequirePackage{amsthm}
@@ -9,13 +10,21 @@
 \RequirePackage{mathtools}
 \mathtoolsset{showonlyrefs}% for hiding unused labels
 %%========================================================================
-%\RequirePackage{times}%times as default text fonts
-\RequirePackage[scaled=0.92]{helvet}	% set Helvetica as the sans-serif font
-\renewcommand{\rmdefault}{ptm}		% set Times as the default text font
+\RequirePackage[scaled=0.9]{helvet}	% set Helvetica as the sans-serif font
+\RequirePackage{tgtermes}%times as default text fonts
 \RequirePackage{mathabx}% fonts for symbols
+\RequirePackage[cal=esstix,scr=rsfso,bb=ams,frak=euler]{mathalpha}
+%-------------------------------------------------------------------------
 %\RequirePackage{newtxtext}
 %\RequirePackage{newtxmath}
-\RequirePackage[cal=esstix,scr=rsfs,bb=ams,frak=euler]{mathalfa}
+%\RequirePackage{esint}% fonts for integrals
+%\RequirePackage[cal=euler,frak=euler]{mathalpha}
+%-------------------------------------------------------------------------
+%\RequirePackage{libertinust1math}% fonts for symbols
+%\RequirePackage[intlimits]{esint}% fonts for integrals
+%\RequirePackage[cal=esstix,scr=boondox,bb=ams,frak=euler]{mathalpha}
+%-------------------------------------------------------------------------
+%\RequirePackage{stix2}% fonts for both text and math symbols
 %%========================================================================
 \RequirePackage{enumitem}
 \setenumerate[1]{itemsep=0pt,partopsep=0pt,parsep=\parskip,topsep=5pt}
@@ -28,6 +37,7 @@
 \RequirePackage{hyperref}
 \hypersetup{
 	hyperindex,
+	unicode=true,
 	plainpages=false,
 	bookmarks=true,
 	bookmarksopen=true,
