@@ -1,7 +1,7 @@
 \begin{
 \end{
 \RequirePackage{
-\documentclass[12pt,a4paper]{
+\documentclass[12pt]{
 \usepackage{
 \input{
 \includegraphics
@@ -14,6 +14,16 @@
 \renewcommand{
 \DeclareMathSymbol{
 \DeclareMathOperator{
+\DeclareSymbolFontAlphabet
+\DeclareMathDelimiter
+\DeclareMathRadical
+\DeclareTextFontCommand
+\DeclareTextSymbol
+\DeclareMathAccent
+\DeclareSymbolFont
+\SetSymbolFont
+\SetSMathFont
+\thispagestyle{empty}
 \theoremstyle{
 \numberwithin{equation}{
 \item
@@ -74,6 +84,7 @@
 \setlength{\arraycolsep}{
 \setlength{\arrayrulewidth}{
 \setlength{\baselineskip}{
+\setlength{\baselinestretch}{
 \setlength{\bigskipamount}{
 \setlength{\columnsep}{
 \setlength{\columnseprule}{
