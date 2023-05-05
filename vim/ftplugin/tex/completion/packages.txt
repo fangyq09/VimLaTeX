@@ -1,5 +1,7 @@
 geometry
 xeCJK
+CJK
+CJKutf8
 a4wide
 amsthm
 amsrefs
@@ -1116,11 +1118,10 @@ citesidx
 CJ
 cje
 CJHebrew
-cjk
-cjk-fonts
-cjk-gs-integrate
-cjk-ko
-cjkpunct
+CJKpunct
+CJKnumb
+CJKulem
+CJKvert
 cjw
 clara
 classes
@@ -4029,6 +4030,8 @@ newsletr
 newspaper
 newthm
 newtx
+newtxtext
+newtxmath
 newtxsf
 newtxtt
 newunicodechar
