@@ -68,9 +68,9 @@ let s:tex_fold_sect_key_words = ['part\W', 'chapter\W', 'section\W',
 			\ 'begin\s*{\s*thebibliography', 'end\s*{\s*thebibliography',
 			\ 'end\s*{\s*bib', 'addbibresource', 'end\s*{\s*document\s*}']
 let s:tex_fold_text_patterns = {
-			\ 'chapter': ['^\s*\\chapter{\([^}]*\)}', g:tex_fold_chap_char],
-      \ 'section': ['^\s*\\section{\([^}]*\)}', g:tex_fold_sec_char],
-      \ 'subsection': ['^\s*\\subsection{\([^}]*\)}', g:tex_fold_subsec_char],
+			\ 'chapter': ['^\s*\\chapter{\([^}]*\)\(}\)*', g:tex_fold_chap_char],
+      \ 'section': ['^\s*\\section{\([^}]*\)\(}\)*', g:tex_fold_sec_char],
+      \ 'subsection': ['^\s*\\subsection{\([^}]*\)\(}\)*', g:tex_fold_subsec_char],
       \ 'env': ['^\s*\(\\\[\)*\s*\\begin{\([^}]*\)}', g:tex_fold_env_char]
       \ }
 let s:tex_fold_envs_names = s:tex_fold_envs_thm + s:tex_fold_envs_sp
