@@ -36,6 +36,7 @@ let s:MapsEnvDict = {
 			\ 'aligned' : "\\begin{aligned}\<cr><++>&\\\\\<cr>&\<cr>\\end{aligned}",
 			\ 'array' : "\\begin{array}{<++>}\<cr>\<cr>\\end{array}",
 			\ 'cas' : "\\begin{cases}\<cr><++>\<cr>\\end{cases}",
+			\ 'numcases' : "\\begin{numcases}{}\<cr><++>\<cr>\\end{cases}",
 			\ 'CJK' : "\\begin{CJK*}{UTF8}{gbsn}\<cr><++>\<cr>\\end{CJK*}",
 			\ 'enumerate' : "\\begin{enumerate}[label=(\\arabic*)]\<cr>\\item"
 			\ ."<++>\<cr>\\end{enumerate}",
@@ -58,9 +59,10 @@ let s:MapsEnvDict = {
 			\ ."\<cr>\\end{tikzpicture}",
 			\ }
 "}}}
+
 "{{{ commands
 let s:MapsComDict = {
-			\ 'av' : "\\left|\<++> \\right|",
+			\ 'av' : "\\left\lvert\<++> \\right\rvert",
 			\ 'bb' : "\\mathbb{<++>}",
 			\ 'bf' : "\\mathbf{<++>}",
 			\ 'bk' : "\llbracket <++>\rrbracket",
@@ -77,6 +79,7 @@ let s:MapsComDict = {
 			\ 'label' : "\\label{<++>}",
 			\ 'lr' : "\\left<++>\\right",
 			\ 'mbox'  : "\\mbox{<++>}",
+			\ 'norm' : "\\left\lVert\<++> \\right\rVert",
 			\ 'overline'  : "\\overline{<++>}",
 			\ 'real' : "\\mathbb{R}",
 			\ 'ref' : "\\ref{<++>}",
@@ -91,7 +94,7 @@ let s:MapsComDict = {
 			\ 'suml' : "\\sum\\limits_{<++>}^{}",
 			\ 'text' : "\\text{<++>}",
 			\ 'tw' : "\\textwidth",
-			\ 'tss' : "\\textsuperscript{<++>}",
+			\ 'th' : "\\textsuperscript{th}",
 			\ 'vli' : "\\varliminf_{<++>}",
 			\ 'vls' : "\\varlimsup_{<++>}",
 			\ 've' : "\\varepsilon",
@@ -186,7 +189,6 @@ let s:Maps_envs_abbrv = {
 			\ 'def' : 'definition',
 			\ 'enu' : 'enumerate',
 			\ 'eq' : 'equation',
-			\ 'eq*' : 'equation*',
 			\ 'exa' : 'example',
 			\ 'exm' : 'example',
 			\ 'exe' : 'exercise',
@@ -195,6 +197,7 @@ let s:Maps_envs_abbrv = {
 			\ 'ga' : 'gather*',
 			\ 'gad' : 'gathered',
 			\ 'item' : 'itemize',
+			\ 'ncas' : 'numcases',
 			\ 'pf' : 'proof',
 			\ 'prob' : 'problem',
 			\ 'prop' : 'proposition',
@@ -232,6 +235,9 @@ function! s:PutEnvironment() "{{{
 	if word =~ '\W'
 		let word = substitute(word,'.*\(left(\|right)\)','','')
 	endif
+	if (strcharpart(word, len(word) - 1) =~ '\w')
+		let	word = substitute(word, '.\{-}\(\w\+\)$', '\1', '')
+	endif
 	if word != ''
 		if has_key(s:Mapsabbrv,word)  
 			let env =  get(s:Mapsabbrv,word)
@@ -251,7 +257,7 @@ function! Tex_env_Debug(word,env,len) "{{{
 	let bkspc = substitute(a:word, '.', "\<bs>", "g")
 	if has_key(s:MapsDict,a:env)
 		let rhs = get(s:MapsDict,a:env)
-		if has_key(s:MapsEnvDict,a:word) && (a:len > len(a:word))
+		if has_key(s:MapsEnvDict,a:env) && (a:len > len(a:word))
 			let rhs = "\<cr>".rhs
 		endif
 	elseif (a:env !~ '\W') && (len(a:word) == a:len)
