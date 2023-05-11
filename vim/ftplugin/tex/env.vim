@@ -1,12 +1,58 @@
-if exists('b:tex_envs')
+if exists('b:loaded_vimtextric_envs')
 	finish
 endif
 
-let b:tex_envs = 1
+let b:loaded_vimtextric_envs = 1
 
 
+let s:tex_prefix = [
+			\ ['',''],
+			\ ['\left','\right'],
+			\ ['\big','\big'],
+			\ ['\Big','\Big'],
+			\ ['\bigg','\bigg'],
+			\ ['\Bigg','\Biggg']
+			\ ]
+let s:tex_parentheses = [
+			\ ['',''],
+			\ ['(',')'],
+			\ ['[',']'],
+			\ ['\{','\}'],
+			\ ['\langle','\rangle'],
+			\ ['\lvert','\rvert'],
+			\ ['\lVert','\rVert']
+			\ ]
+""{{{ let s:tex_KeyEnvList =
+let s:tex_KeyEnvList = [
+			\ ['eq\%[uation]', 'equation', '\label{eq:}'],
+			\ ['\(ald\|aligned\)', 'aligned', ''],
+			\ ['al\%[ign]', 'align', ''],
+			\ ['ga\%[thered]', 'gathered', ''],
+			\ ['\(thm\|theo\%[rem]\)', 'theorem', ''],
+			\ ['prop\%[osition]', 'proposition', ''],
+			\ ['co\%[rollary]', 'corollary', ''],
+			\ ['le\%[ema]', 'lemma', ''],
+			\ ['re\%[mark]', 'remark', ''],
+			\ ['item\%[ize]', 'itemize', ''],
+			\ ['enu\%[merate]', 'enumerate', '[label={(\arabic*)}]'],
+			\ ['des\%[cription]', 'description', ''],
+			\ ['prob\%[lem]', 'problem', ''],
+			\ ['exe\%[rcise]', 'exercise', ''],
+			\ ['exa\%[mple]', 'example', ''],
+			\ ['cas\%[es]', 'cases', ''],
+			\ ['ncas', 'numcases', '{}'],
+			\ ['ar\%[ray]', 'array', '{}'],
+			\ ['cen\%[ter]', 'center', ''],
+			\ ['tabl\%[e]', 'table', '\label{tab:}\centering\caption{}'],
+			\ ['tabu\%[lar]', 'tabular', '{}'],
+			\ ['fig\%[ure]', 'figure', '[H]\label{fig:}\centering\caption{}']
+			\	]
+"}}}
+
+let s:tex_inside_envs = ['aligned', 'gathered', 'array', 'cases', 'split']
+let s:tex_outside_envs = ['center', 'figure', 'table']
 "Get env name, begin pos, end pos and length of the env
-function! GetTeXEnv(mode,...) "{{{1
+function! GetTeXEnv(mode) "{{{1
 	let pos = getpos('.')
 	let win = winsaveview()
 	let env_name = ''
@@ -66,8 +112,8 @@ function! GetTeXEnv(mode,...) "{{{1
 			let minipos = searchpos('\\begin{\|\\[\|\$','bWn')
 			let prefix_ls = '\\left\|\\big\|\\Big\|\\bigg\|\\Bigg'
 			let prefix_rs = '\\right\|\\big\|\\Big\|\\bigg\|\\Bigg'
-			let str_envend = ')\|]\|\\}\|\\rangle'
-			let str_envstart = '(\|[\|\\{\|\\langle'
+			let str_envend = ')\|]\|\\}\|\\rangle\|\\rvert\|\\rVert'
+			let str_envstart = '(\|[\|\\{\|\\langle\|\\lvert\|\\lVert'
 			let str_search =  '\('.prefix_ls.'\)\=\('.str_envstart.'\)'
 			let l:pair = 0
 			while l:pair == 0 
@@ -137,30 +183,8 @@ function! s:Get_pair_right(prefixleft,envnameleft) "{{{1
 endfunction
 "}}}1
 
-""{{{1 let s:KeyEnvList =
-let s:KeyEnvList = [
-			\ ['\\[', '\[', '\]'],
-			\ ["\\$", '$', '$'],
-			\ ['eq\%[uation]', '\begin{equation}\label{eq:}', '\end{equation}'],
-			\ ['\(ald\|aligned\)', '\begin{aligned}', '\end{aligned}'],
-			\ ['al\%[ign]', '\begin{align}', '\end{align}'],
-			\ ['ga\%[thered]', '\begin{gathered}', '\end{gathered}'],
-			\ ['\(thm\|theo\%[rem]\)', '\begin{theorem}', '\end{theorem}'],
-			\ ['prop\%[osition]', '\begin{proposition}', '\end{proposition}'],
-			\ ['co\%[rollary]', '\begin{corollary}', '\end{corollary}'],
-			\ ['le\%[ema]', '\begin{lemma}', '\end{lemma}'],
-			\ ['re\%[mark]', '\begin{remark}', '\end{remark}'],
-			\ ['item\%[ize]', '\begin{itemize}', '\end{itemize}'],
-			\ ['enu\%[merate]', '\begin{enumerate}', '\end{enumerate}'],
-			\ ['des\%[cription]', '\begin{description}','\end{description}'],
-			\ ['prob\%[lem]', '\begin{problem}', '\end{problem}'],
-			\ ['exe\%[rcise]', '\begin{exercise}', '\end{exercise}'],
-			\ ['exa\%[mple]', '\begin{example}', '\end{example}']
-			\	]
-"}}}1
 
-"change env 
-function! s:Change(mode,old_env,name,...) "{{{1
+function! s:Change_surroundings(mode,old_env,name) "{{{
 
 	let oldenv_name = a:old_env[0]
 	let oldenv_startline = a:old_env[1][0]
@@ -169,47 +193,18 @@ function! s:Change(mode,old_env,name,...) "{{{1
 	let oldenv_endcol = a:old_env[2][1]
 	let oldenv_startlen = a:old_env[3][0]
 	let oldenv_endlen = a:old_env[3][1]
-	let str_startl = '\(\\left\|\\big\|\\Big\|\\bigg\|\\Bigg\)\=\((\|[\|\\{\|\\langle\)'
 
-	if a:name == ''
-		return 0
+	if empty(a:name)
+		return ''
 	endif
 
 	if a:mode == 'com'
-		let new_env = matchlist(a:name,str_startl)
-		let first = escape(a:name,'\')
-		if new_env[1] == "\\left"
-			let sec_pre = '\right'
-		else
-			let sec_pre = new_env[1]
-		endif
-		if new_env[2] == '('
-			let sec_clo = ')'
-		elseif new_env[2] == '['
-			let sec_clo = ']'
-		elseif new_env[2] == "\\{"
-			let sec_clo = '\}'
-		elseif new_env[2] == "\\langle"
-			let sec_clo = '\rangle'
-		endif
-		let second = escape(sec_pre.sec_clo,'\')
-	else
-		let count_num = 0
-		while count_num <= len(s:KeyEnvList)-1
-			if a:name =~ '^'.s:KeyEnvList[count_num][0]
-				let first = s:KeyEnvList[count_num][1]
-				let second = s:KeyEnvList[count_num][2]
-				break
-			endif
-				let count_num = count_num + 1
-		endwhile
-		if count_num == len(s:KeyEnvList)
-			let first = '\begin{'.a:name.'}'
-			let second = '\end{'.a:name.'}'
-		endif
-	endif
-
-	if a:mode == 'com'
+		let first_anchor = a:name[0]
+		let second_anchor = a:name[1]
+		let first = s:tex_prefix[first_anchor][0] . s:tex_parentheses[second_anchor][0]
+		let second = s:tex_prefix[first_anchor][1] . s:tex_parentheses[second_anchor][1]
+		let first = escape(first,'\')
+		let second = escape(second,'\')
 		let oldendline = getline(oldenv_endline)
 		let subsb = oldenv_endcol-1
 		let newendline = substitute(oldendline,".\\{".subsb."}\\zs.\\{".oldenv_endlen."}\\ze",second,"")
@@ -218,77 +213,153 @@ function! s:Change(mode,old_env,name,...) "{{{1
 		let subse = oldenv_startcol-1
 		let newstartline = substitute(oldstartline,".\\{".subse."}\\zs.\\{".oldenv_startlen."}\\ze",first,"")
 		call setline(oldenv_startline,newstartline)
-		return
-	endif
-
-	if oldenv_name == 'ilm'
+	elseif oldenv_name == 'ilm'
+		let delta = oldenv_endline - oldenv_startline + 4
 		let oldendline = getline(oldenv_endline)
+		"let endline_indent = matchstr(oldendline,'^\s*')
+		if a:name[0] == 'sdm'
+			let first = '\['
+			let second = '\]'
+		else
+			let first = '\begin{'.a:name[0].'}'.a:name[1]
+			let second = '\end{'.a:name[0].'}'
+		endif
 		let newendline1 = strpart(oldendline,0,oldenv_endcol-1)
-		let newendline3 = strpart(oldendline,oldenv_endcol)
 		let periodmark = strpart(oldendline,oldenv_endcol,1)
-		if periodmark =~',\|.\|;\|?'
+		if periodmark =~'\(,\|\.\|;\|?\)'
 			let newendline1 = newendline1.periodmark
 			let newendline3 = strpart(oldendline,oldenv_endcol+1)
-		endif 
-		if newendline1 =~ '\S'
-			call setline(oldenv_endline,newendline1)
-			if newendline3 =~ '\S'
-				call append(oldenv_endline,[second,newendline3])
-			else
-				call append(oldenv_endline,second)
-			endif
 		else
-			call setline(oldenv_endline,second)
-			if newendline3 =~ '\S'
-				call append(oldenv_endline,newendline3)
-			endif
-		endif
+			let newendline3 = strpart(oldendline,oldenv_endcol)
+		endif 
+		let end_app_list = [newendline1,second,newendline3]
+		let end_app_list = filter(end_app_list, 'v:val !~ "^\\s*$"')
+		let end_app_position = oldenv_endline - 1
+		exec oldenv_endline . 'delete'
+		call append(end_app_position,end_app_list)
+
 		let oldstartline = getline(oldenv_startline)
+		"let startline_indent = matchstr(oldstartline,'^\s*')
 		let newstartline1 = strpart(oldstartline,0,oldenv_startcol-1)
 		let newstartline3 = strpart(oldstartline,oldenv_startcol)
-		if newstartline1 =~ '\S'
-			call setline(oldenv_startline,newstartline1)
-			if newstartline3 =~ '\S'
-				call append(oldenv_startline,[first,newstartline3])
-			else
-				call append(oldenv_startline,first)
-			endif
-		else
-			call setline(oldenv_startline,first)
-			if newstartline3 =~ '\S'
-				call append(oldenv_startline,newstartline3)
-			endif
-		endif
+		let start_app_list = [newstartline1,first,newstartline3]
+		let start_app_list = filter(start_app_list, 'v:val !~ "^\\s*$"')
+		let start_app_position = oldenv_startline - 1
+		exec oldenv_startline . 'delete'
+		call append(start_app_position,start_app_list)
+		silent! exec 'normal! ' . oldenv_startline . 'G' . delta . '==' 
 	elseif oldenv_name == 'sdm'
-		if  a:name =~ 'ald\|aligned\|ga\%[thered]\|array'
-			call append(oldenv_endline-1,second)
-			call append(oldenv_startline,first)
+		if a:name[0] == '$'
+			let oldendline = getline(oldenv_endline)
+			let oldenv_endline_pre = getline(oldenv_endline - 1)
+			if oldendline =~ '^\s*\\]\s*$'
+				exec oldenv_endline . 'delete'
+				let newenv_endline_pre = substitute(oldenv_endline_pre,'\s*$','','') . '$'
+				call setline(oldenv_endline-1,newenv_endline_pre)
+			endif
+			let oldstartline = getline(oldenv_startline)
+			let oldenv_startline_aft = getline(oldenv_startline+1)
+			let startline_indent = matchstr(oldstartline,'^\s*')
+			if oldstartline =~ '^\s*\\[\s*$'
+				exec oldenv_startline . 'delete'
+				let newenv_startline_aft = startline_indent . '$' 
+							\ . substitute(oldenv_startline_aft,'^\s*','','')
+				call setline(oldenv_startline,newenv_startline_aft)
+			endif
+			let delta = oldenv_endline - oldenv_startline  + 1
+			silent! exec 'normal! ' . oldenv_startline . 'G' . delta . '==' 
+		elseif a:name[0] == 'sdm'
+			return ''
 		else
-			call setline(oldenv_endline,second)
-			call setline(oldenv_startline,first)
+			let first = '\begin{'.a:name[0].'}'.a:name[1]
+			let second = '\end{'.a:name[0].'}'
+			if index(s:tex_inside_envs, a:name[0]) >= 0
+				call append(oldenv_endline-1,second)
+				call append(oldenv_startline,first)
+				let delta = oldenv_endline - oldenv_startline + 3
+				silent! exec 'normal! ' . oldenv_startline . 'G' . delta . '==' 
+			else
+				call setline(oldenv_endline,second)
+				call setline(oldenv_startline,first)
+				let delta = oldenv_endline - oldenv_startline + 1
+				silent! exec 'normal! ' . oldenv_startline . 'G' . delta . '==' 
+			endif
 		endif
 	else
-		call setline(oldenv_endline,second)
-		call setline(oldenv_startline,first)
+		if a:name[0] == '$'
+			let oldendline = getline(oldenv_endline)
+			let oldenv_endline_pre = getline(oldenv_endline - 1)
+			exec oldenv_endline . 'delete'
+			let newenv_endline_pre = substitute(oldenv_endline_pre,'\s*$','','') . '$'
+			call setline(oldenv_endline-1,newenv_endline_pre)
+			let oldstartline = getline(oldenv_startline)
+			let oldenv_startline_aft = getline(oldenv_startline+1)
+			let startline_indent = matchstr(oldstartline,'^\s*')
+			exec oldenv_startline . 'delete'
+			let newenv_startline_aft = startline_indent . '$' 
+						\ . substitute(oldenv_startline_aft,'^\s*','','')
+			call setline(oldenv_startline,newenv_startline_aft)
+			let delta = oldenv_endline - oldenv_startline  + 1
+			silent! exec 'normal! ' . oldenv_startline . 'G' . delta . '==' 
+		elseif a:name[0] == 'sdm'
+			let first = '\['
+			let second = '\]'
+			call setline(oldenv_endline,second)
+			call setline(oldenv_startline,first)
+			let delta = oldenv_endline - oldenv_startline + 1
+			silent! exec 'normal! ' . oldenv_startline . 'G' . delta . '==' 
+		else
+			let new_env_name = a:name[0]
+			if index(s:tex_outside_envs, new_env_name) >= 0
+				let first = '\begin{'.a:name[0].'}'.a:name[1]
+				let second = '\end{'.a:name[0].'}'
+				call append(oldenv_endline,second)
+				call append(oldenv_startline-1,first)
+				let delta = oldenv_endline - oldenv_startline + 3
+				silent! exec 'normal! ' . oldenv_startline . 'G' . delta . '==' 
+			elseif index(s:tex_inside_envs, new_env_name) >= 0
+				let first = '\begin{'.a:name[0].'}'.a:name[1]
+				let second = '\end{'.a:name[0].'}'
+				call append(oldenv_endline-1,second)
+				call append(oldenv_startline,first)
+				let delta = oldenv_endline - oldenv_startline + 3
+				silent! exec 'normal! ' . oldenv_startline . 'G' . delta . '==' 
+			else
+				if new_env_name == '*'
+					if strcharpart(oldenv_name, strchars(oldenv_name) - 1) == '*'
+						let new_env_name = strcharpart(oldenv_name,0,strchars(oldenv_name) - 1)
+					else
+						let new_env_name = oldenv_name . '*'
+					endif
+				endif
+				let oldenv_name = escape(oldenv_name,'*')
+				let env_close_old = getline(oldenv_endline)
+				let env_close_new = substitute(env_close_old,'\\end{'.oldenv_name.'}',
+							\ '\\end{'.new_env_name.'}','')
+				let env_open_old = getline(oldenv_startline)
+				let env_open_new = substitute(env_open_old,'\\begin{'.oldenv_name.'}',
+							\ '\\begin{'.new_env_name.'}','')
+				call setline(oldenv_endline,env_close_new)
+				call setline(oldenv_startline,env_open_new)
+			endif
+		endif
 	endif
+	return ''
 endfunction
 "}}}
-"
-function! Tex_env_change(mode) "{{{1
+function! s:TeX_change_env(mode) "{{{
 	if (a:mode == "com" || a:mode == "math") && (tex#outils#ismath("texMathZone")==0)
-		echomsg "You are not inside environment !"
+		echo "You are not inside environment !"
 		return
 	endif
 	let old_env = GetTeXEnv(a:mode)
-	let prefixdict= {'0': '', '1': '\left', '2': '\big', '3': '\Big', '4': '\bigg', '5': '\Bigg'}
-	let envdict= {'0': '', '1': '(', '2': '[', '3': '\{', '4': '\langle'}
 	if old_env[0] == ''
 		if a:mode == "com"
-			echomsg "no surrounding!"
+			echo "no surrounding!"
 		else
-			echomsg "not in any environment!"
+			echo "not in any environment!"
 		endif
-		return 0
+		return ''
 	else
 		let nam = old_env[0]
 		if nam == "sdm"
@@ -303,22 +374,53 @@ function! Tex_env_change(mode) "{{{1
 	if a:mode == "com"
 		let inputnewpair = input("change it to: nn \n (0); (1)\\left\\right; (2)\\big; (3)\\Big;   (4)\\bigg; \t (5)\\Bigg \n (0); (1)();   \t      (2)[];   (3)\\{\\};   (4)\\langle\\rangle \n")
 		if strlen(inputnewpair) == 2 && ( inputnewpair != '\D' )
-			let newenvpair = split(inputnewpair,'\zs')
-			let newenv = get(prefixdict,newenvpair[0]) . get(envdict,newenvpair[1])
+			let newenv = split(inputnewpair,'\zs')
 		else
-			return 0
+			return ''
 		endif
 	else
-		let newenv = input('change it to:')
+		let newenv_pre = input('change it to:')
+		if newenv_pre =~ '\\['
+			let newenv = ['sdm', '']
+		else
+			let count_num = 0
+			while count_num <= len(s:tex_KeyEnvList)-1
+				if newenv_pre =~ '^'.s:tex_KeyEnvList[count_num][0]
+					let newenv = s:tex_KeyEnvList[count_num][1:]
+					break
+				endif
+				let count_num = count_num + 1
+			endwhile
+			if count_num == len(s:tex_KeyEnvList)
+				let newenv = [newenv_pre, '']
+			endif
+		endif
 	endif
-	call <SID>Change(a:mode,old_env,newenv)
+	call <SID>Change_surroundings(a:mode,old_env,newenv)
 endfunction
 "}}}1
+"{{{https://stackoverflow.com/questions/1533565/how-to-get-visually-selected-text-in-vimscript
+function! s:get_visual_selection()
+    " Why is this not a built-in Vim script function?!
+    let [line_start, column_start] = getpos("'<")[1:2]
+    let [line_end, column_end] = getpos("'>")[1:2]
+    let lines = getline(line_start, line_end)
+		if len(lines) == 0
+			return ''
+		else
+			let lines[-1] = lines[-1][: column_end - (&selection == 'inclusive' ? 1 : 2)]
+			let lines[0] = lines[0][column_start - 1:]
+			return join(lines, "\n")
+		endif
+endfunction
+"}}}
 
-
-nnoremap <silent><buffer><F3> :call Tex_env_change('com')<cr>
-nnoremap <silent><buffer><F4> :call Tex_env_change('math')<cr>
-nnoremap <silent><buffer><F5> :call Tex_env_change('env')<cr>
+function! s:TeX_add_surroundings()
+endfunction
+"vnoremap <C-i> :<C-u>call <SID>TeX_add_surroundings()<CR>
+nnoremap <silent><buffer><F3> :call <SID>TeX_change_env('com')<cr>
+nnoremap <silent><buffer><F4> :call <SID>TeX_change_env('math')<cr>
+nnoremap <silent><buffer><F5> :call <SID>TeX_change_env('env')<cr>
 
 " vim:fdm=marker:noet:ff=unix
 
