@@ -38,7 +38,7 @@ let s:MapsEnvDict = {
 			\ 'cas' : "\\begin{cases}\<cr><++>\<cr>\\end{cases}",
 			\ 'numcases' : "\\begin{numcases}{}\<cr><++>\<cr>\\end{cases}",
 			\ 'CJK' : "\\begin{CJK*}{UTF8}{gbsn}\<cr><++>\<cr>\\end{CJK*}",
-			\ 'enumerate' : "\\begin{enumerate}[label=(\\arabic*)]\<cr>\\item"
+			\ 'enumerate' : "\\begin{enumerate}[label={(\\arabic*)}]\<cr>\\item"
 			\ ."<++>\<cr>\\end{enumerate}",
 			\ 'equation' : "\\begin{equation}\\label{<++>}\<cr>\\end{equation}",
 			\ 'figure' :  "\\begin{figure}[H]\<cr>\\centering\<cr>"
@@ -54,7 +54,8 @@ let s:MapsEnvDict = {
 			\ 'table' : "\\begin{table}\<cr>\\centering\<cr>"
 			\ ."\\caption{tab:}\<cr>\\begin{tabular}{<++>}\<cr>\<cr>"
 			\ ."\\end{tabular}\<cr>\\label{tab:}\<cr>\\end{table}",
-			\ 'tabular': "\\begin{tabular}{<++>}\<cr>\\end{tabular}",
+			\ 'tabular': "\\begin{tabular}{<++>}\%\\toprule\<cr>\%\\bottomrule"
+			\ ."\<cr>\\end{tabular}",
 			\ 'tikzpicture'  : "\\begin{tikzpicture}[thick, scale=2]\<cr><++>"
 			\ ."\<cr>\\end{tikzpicture}",
 			\ }
