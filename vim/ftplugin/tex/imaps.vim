@@ -29,7 +29,7 @@ let b:loaded_vimtextric_imaps = 1
 if !exists('g:vimtextric_TEXIMAP')
 	let b:vimtextric_TEXIMAP = 1
 else 
-	let let b:vimtextric_TEXIMAP = g:vimtextric_TEXIMAP
+	let b:vimtextric_TEXIMAP = g:vimtextric_TEXIMAP
 endif
 
 "{{{ envs
