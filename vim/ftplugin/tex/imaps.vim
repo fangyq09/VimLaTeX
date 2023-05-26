@@ -21,13 +21,15 @@
 "  lot delay when typing (),{},[].
 "=============================================================================
 
-if exists("g:loaded_vimtextric_imaps")
+if exists("b:loaded_vimtextric_imaps")
 	finish
 endif
-let g:loaded_vimtextric_imaps = 1
+let b:loaded_vimtextric_imaps = 1
 
 if !exists('g:vimtextric_TEXIMAP')
-	let g:vimtextric_TEXIMAP = 1
+	let b:vimtextric_TEXIMAP = 1
+else 
+	let let b:vimtextric_TEXIMAP = g:vimtextric_TEXIMAP
 endif
 
 "{{{ envs
@@ -36,9 +38,9 @@ let s:MapsEnvDict = {
 			\ 'aligned' : "\\begin{aligned}\<cr><++>&\\\\\<cr>&\<cr>\\end{aligned}",
 			\ 'array' : "\\begin{array}{<++>}\<cr>\<cr>\\end{array}",
 			\ 'cas' : "\\begin{cases}\<cr><++>\<cr>\\end{cases}",
-			\ 'numcases' : "\\begin{numcases}{}\<cr><++>\<cr>\\end{cases}",
+			\ 'numcases' : "\\begin{numcases}{}\<cr><++>\<cr>\\end{numcases}",
 			\ 'CJK' : "\\begin{CJK*}{UTF8}{gbsn}\<cr><++>\<cr>\\end{CJK*}",
-			\ 'enumerate' : "\\begin{enumerate}[label={(\\arabic*)}]\<cr>\\item"
+			\ 'enumerate' : "\\begin{enumerate}[label={(\\arabic*)}]\<cr>\\item "
 			\ ."<++>\<cr>\\end{enumerate}",
 			\ 'equation' : "\\begin{equation}\\label{<++>}\<cr>\\end{equation}",
 			\ 'figure' :  "\\begin{figure}[H]\<cr>\\centering\<cr>"
@@ -48,14 +50,13 @@ let s:MapsEnvDict = {
 			\ 'lst' : "\\begin{lstlisting}[language=bash,breaklines]\<cr><++>\<cr>"
 			\ ."\\end{lstlisting}",
 			\ 'm' : "\\[\<cr><++>\<cr>\\]",
-			\ 'minipage'  : "\\begin{minipage}[t]{<++>cm}\<cr>\\end{minipage}",
+			\ 'minipage'  : "\\begin{minipage}{<++>0.5\\textwidth}\<cr>\\end{minipage}",
 			\ 'pic'  : "\\begin{center}\<cr>\\includegraphics[width=\\textwidth]"
 			\ ."{<++>}\<cr>\\end{center}",
 			\ 'table' : "\\begin{table}\<cr>\\centering\<cr>"
 			\ ."\\caption{tab:}\<cr>\\begin{tabular}{<++>}\<cr>\<cr>"
 			\ ."\\end{tabular}\<cr>\\label{tab:}\<cr>\\end{table}",
-			\ 'tabular': "\\begin{tabular}{<++>}\%\\toprule\<cr>\%\\bottomrule"
-			\ ."\<cr>\\end{tabular}",
+			\ 'tabular': "\\begin{tabular}{<++>}\<cr>\\end{tabular}",
 			\ 'tikzpicture'  : "\\begin{tikzpicture}[thick, scale=2]\<cr><++>"
 			\ ."\<cr>\\end{tikzpicture}",
 			\ }
@@ -63,7 +64,8 @@ let s:MapsEnvDict = {
 
 "{{{ commands
 let s:MapsComDict = {
-			\ 'av' : "\\left\lvert\<++> \\right\rvert",
+			\ 'av' : "\\left\\lvert\<++> \\right\\rvert",
+			\ 'abs' : "\\lvert\<++> \\rvert",
 			\ 'bb' : "\\mathbb{<++>}",
 			\ 'bf' : "\\mathbf{<++>}",
 			\ 'bk' : "\llbracket <++>\rrbracket",
@@ -75,13 +77,15 @@ let s:MapsComDict = {
 			\ 'exp' : "\\exp\\left(<++>\\right)",
 			\ 'frac' : "\\frac{<++>}{}",
 			\ 'frak' : "\\mathfrak{<++>}",
+			\ 'i' : "\\infty",
 			\ 'int' : "\\int_{<++>}^{}",
 			\ 'ip' : "\\langle <++> \\rangle",
 			\ 'label' : "\\label{<++>}",
 			\ 'lr' : "\\left<++>\\right",
 			\ 'mbox'  : "\\mbox{<++>}",
-			\ 'norm' : "\\left\lVert\<++> \\right\rVert",
+			\ 'norm' : "\\left\\lVert\<++> \\right\\rVert",
 			\ 'overline'  : "\\overline{<++>}",
+			\ 'p' : "\\partial",
 			\ 'real' : "\\mathbb{R}",
 			\ 'ref' : "\\ref{<++>}",
 			\ 'rn' : "\\mathbb{R}^n",
@@ -91,8 +95,11 @@ let s:MapsComDict = {
 			\ 'rb' : "\\left(<++>\\right)",
 			\ 'sb' : "\\left[<++>\\right]",
 			\ 'scr' : "\\mathscr{<++>}",
+			\ 'sm' : "\\setminus",
+			\ 'sub'  : "\\subseteq",
 			\ 'sum'  : "\\sum_{<++>}^{}",
 			\ 'suml' : "\\sum\\limits_{<++>}^{}",
+			\ 'sup'  : "\\supseteq",
 			\ 'text' : "\\text{<++>}",
 			\ 'tw' : "\\textwidth",
 			\ 'th' : "\\textsuperscript{th}",
@@ -102,6 +109,8 @@ let s:MapsComDict = {
 			\ 'vt' : "\\vartheta",
 			\ 'vr' : "\\varrho",
 			\ 'vp' : "\\varphi",
+			\ 'wh' : "\\widehat{<++>}",
+			\ 'wt' : "\\widetilde{<++>}",
 			\ 'underline' : "\\underline{<++>}",
 			\ 'alpha' : "\\alpha",
 			\ 'beta' : "\\beta",
@@ -130,6 +139,7 @@ let s:MapsComDict = {
 			\ '('   : "\\left(",
 			\ ')'   : "\\right)",
 			\ '(('   : '\left(<++>\right)',
+			\ 'vect' : '\\overrightarrow',
 			\ }
 "}}}
 
@@ -138,6 +148,7 @@ let s:Mapswordsabbrv = {
 			\ 'lip'     : 'Lipschitz',
 			\ 'ffp'     : 'Federer Fleming projection',
 			\ 'st'      : 'such that',
+			\ 'eun'      : '$\mathbb{R}^{n}$',
 			\ 'lnr'     : 'Lipschitz neighborhood retract',
 			\ 'nbh'     : 'neighborhood',
 			\ 'nhb'     : 'neighborhood',
@@ -236,10 +247,12 @@ function! s:PutEnvironment() "{{{
 	if word =~ '\W'
 		let word = substitute(word,'.*\(left(\|right)\)','','')
 	endif
-	if (strcharpart(word, len(word) - 1) =~ '\w')
-		let	word = substitute(word, '.\{-}\(\w\+\)$', '\1', '')
-	endif
 	if word != ''
+		if (strcharpart(word, len(word) - 1) =~ '\w')
+			let	word = substitute(word, '.\{-}\(\w\+\)$', '\1', '')
+		else
+			let word = substitute(word, '.\{-}\(\W\+\)$', '\1', '')
+		endif
 		if has_key(s:Mapsabbrv,word)  
 			let env =  get(s:Mapsabbrv,word)
 		else
@@ -313,7 +326,7 @@ endfunction
 function! s:LookupCharacter(char,...) "{{{1
 	let charHash = s:Hash(a:char)
 	let text = strpart(getline("."), 0, col(".")-1) . a:char
-	if !exists('lhs') || !exists('rhs')
+	"if !exists('lhs') || !exists('rhs')
 		let lhs = matchstr(text, "\\C\\V\\(" . s:LHS_tex_{charHash} . "\\)\\$")
 		if strlen(lhs) == 0
 			return a:char
@@ -321,7 +334,7 @@ function! s:LookupCharacter(char,...) "{{{1
 			let hash = s:Hash(lhs)
 			let rhs = s:Map_tex_{hash}
 		endif
-	endif
+	"endif
 	let bs = substitute(strpart(lhs, 1), ".", "\<bs>", "g")
 	" \<c-g>u inserts an undo point
 	if a:0 > 0
@@ -346,13 +359,15 @@ endfunction
 "}}}
 
 
-function! TeX_Outils_RLHI()
+function! TeX_Outils_RLHI() "{{{
 	call histdel("/", -1)
 	let @/ = histget("/", -1)
 	return ''
 endfunction
+"}}}
 
-if g:vimtextric_TEXIMAP
+"{{{ TEXIMAP
+if b:vimtextric_TEXIMAP
 call TEXIMAP("__","_{<++>}")
 call TEXIMAP("^^","^{<++>}")
 call TEXIMAP("$$","$<++>$")
@@ -368,7 +383,7 @@ call TEXIMAP("`9","\\subseteq")
 call TEXIMAP("`0","\\supseteq")
 call TEXIMAP("`6","\\partial")
 call TEXIMAP("`~","\\widetilde{<++>}")
-call TEXIMAP("`^","\\widehat{<++>}")
+"call TEXIMAP("`^","\\widehat{<++>}")
 call TEXIMAP('`\',"\\setminus")
 call TEXIMAP('`e',"\\emptyset")
 "call TEXIMAP('\[',"\\[\<cr><++>\<cr>\\]")
@@ -376,8 +391,10 @@ call TEXIMAP('\{',"\\{<++>\\}")
 call TEXIMAP('\(',"\\(<++>\\)")
 call TEXIMAP('`/',"\\frac{<++>}{}")
 endif
+"}}}
 """"%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-let s:KeyWDict = {
+"{{{let s:KeyWDict ={}
+let s:KeyWDict = { 
 			\ '()' : '\left(<++>\right)',
 			\ '[]' : '\left[<++>\right]',
 			\ '{}' : '\left\{<++>\right\}',
@@ -396,12 +413,62 @@ let s:KeyWDict = {
 			\ 'Cor'   : "Corollary \\ref{co<++>}",
 			\ 'Prop'   : "Proposition \\ref{prop:<++>}",
 			\ 'Le'   : "Lemma \\ref{le:<++>}",
-			\ 'article' : "\\documentclass[12pt]{article}\<cr>"
-			\ ."\\begin{document}\<cr><++>\<cr>\\end{document}"
+			\ 'article' : "\\documentclass[12pt]{article}\<cr>\<cr>"
+			\ ."\\begin{document}\<cr><++>\<cr>\\end{document}",
+			\ 'amsart' : "\\documentclass[12pt,reqno]{amsart}\<cr>\<cr>"
+			\ ."\\begin{document}\<cr><++>\<cr>\\end{document}",
+			\ 'xe' : '% !TeX engine = xelatex',
+			\ 'a4' : "\\usepackage[a4paper,includeheadfoot,margin=2.54cm]{geometry}",
+			\ 'times' : "\\usepackage[scaled=0.9]{helvet}\<cr>\\usepackage{tgtermes}",
+			\ 'hyperref' : "\\usepackage[unicode=true,\<cr>colorlinks=true,\<cr>"
+			\ ."linkcolor=purple,\<cr>citecolor=blue,\<cr>urlcolor=violet,\<cr>"
+			\ ."linktoc=all,\<cr>plainpages=false,\<cr>bookmarks=true,\<cr>"
+			\ ."bookmarksopen=true,\<cr>bookmarksnumbered]{hyperref}",
+			\ 'mathabx' : "\\usepackage{mathabx}\<cr>"
+			\ ."\\usepackage[scr=rsfso,bb=ams,frak=euler]{mathalpha}",
+			\ 'amsthm' : "\\usepackage{amsthm}\<cr>"
+			\ ."\\theoremstyle{plain}\<cr>"
+			\ ."\\newtheorem{theorem}{Theorem}[section]\<cr>"
+			\ ."\\newtheorem*{theorem*}{Theorem}\<cr>"
+			\ ."\\newtheorem{corollary}[theorem]{Corollary}<\cr>"
+			\ ."\\newtheorem{lemma}[theorem]{Lemma}\<cr>"
+			\ ."\\newtheorem{proposition}[theorem]{Proposition}\<cr>"
+			\ ."\\theoremstyle{definition}\<cr>"
+			\ ."\\newtheorem{definition}[theorem]{Definition}\<cr>"
+			\ ."\\theoremstyle{remark}\<cr>"
+			\ ."\\newtheorem{remark}[theorem]{Remark}\<cr>"
+			\ ."\\newtheorem{example}[theorem]{Example}\<cr>"
+			\ ."\\numberwithin{equation}{section}",
+			\ 'titlesec' : "\\usepackage{titlesec}\<cr>"
+			\ ."\\titleformat{\\section}{\\normalfont\\Large\\bfseries\\centering}\<cr>"
+			\ ."{\\thesection.}{0.5em}{}\<cr>"
+			\ ."\\titlespacing{\\section}{0pt}{0em}{20pt}\<cr>"
+			\ ."\\newcommand{\\sectionbreak}{\\clearpage}\%start new page for each section",
+			\ 'titlepage' : "\\begin{titlepage}\<cr>\\title{}\<cr>\\author{}\<cr>" 
+			\ ."\\date{}\<cr>\\maketitle\<cr>\\thispagestyle{empty}\<cr>" 
+			\ ."\\end{titlepage}\<cr>\\pagestyle{empty}\<cr>\\tableofcontents\<cr>" 
+			\ ."\\newpage\\clearpage\<cr>\\setcounter{page}{1}\<cr>"
+			\ ."\\pagestyle{plain}\<cr>",
+			\ 'xetimes' : "\\RequirePackage{fontspec}\<cr>"
+			\ ."\\defaultfontfeatures{Mapping=tex-text}\<cr>" 
+			\ ."\\setmainfont[BoldFont = texgyretermes-bold.otf,\<cr>"
+			\ ."ItalicFont = texgyretermes-italic.otf]{texgyretermes-regular.otf}",
+			\ 'xeCJK' : "\\RequirePackage{xeCJK}\<cr>"
+			\ ."\\setCJKmainfont[Path = \\string~/.fonts/,\<cr>"
+			\ ."BoldFont = SourceHanSansCN-Medium.otf,\<cr>"
+			\ ."ItalicFont = SourceHanSerifCN-ExtraLight.otf,\<cr>"
+			\ ."BoldItalicFont = SourceHanSansCN-Light.otf\<cr>"
+			\ ."]{SourceHanSerifCN-Regular.otf}",
+			\ 'xemath' : "\\RequirePackage{unicode-math}\<cr>"
+			\ ."\\setmathfont{STIXTwoMath-Regular.otf}",
+			\ 'xemathtimes' : "\\RequirePackage{unicode-math}\<cr>"
+			\ ."\\setmathfont{texgyretermes-math.otf}\<cr>"
+			\ ."\\setmathfont[range=\\setminus]{Asana-Math.otf}",
 			\ }
+"}}}
 inoremap <buffer> <C-i>		 <C-r>=<SID>PutEnv()<CR>
 function! s:PutEnv() "{{{
-	let key_word = input('Insert Env: ')
+	let key_word = input('Insert Env/Command: ')
 	if key_word == ''
 		let events = ''
 	elseif has_key(s:KeyWDict,key_word)
@@ -416,7 +483,7 @@ function! s:PutEnv() "{{{
 		let rhs= "\\begin{".env_name."}\<cr><++>\<cr>\\end{".env_name."}"
 		let events = PutTextWithMovement(rhs)
 	end
-		return events
+	return events
 endfunction
 "}}}
 
