@@ -15,15 +15,15 @@
 "because of both of these setting will cause much slower.
 "=============================================================================
 
-if exists('b:VimLaTeX_folding')
+if exists('b:loaded_vimtextric_folding')
 	finish
 endif
-let b:VimLaTeX_folding = 1
+let b:loaded_vimtextric_folding = 1
 
 let save_cpo = &cpo
 set cpo&vim
-augroup LatexSuite
-	au LatexSuite User LatexSuiteFileType 
+augroup VimTeXtric
+	au VimTeXtric User VimTeXtricFileType 
 				\ call TeX_Fold_Force()
 augroup END
 
@@ -39,8 +39,7 @@ if !exists('g:tex_fold_sec_char')
     let g:tex_fold_sec_char = "\u25CF" 
 endif
 if !exists('g:tex_fold_subsec_char')
-    "let g:tex_fold_subsec_char = '▪'
-    let g:tex_fold_subsec_char = "\u25AA"
+    let g:tex_fold_subsec_char = "\u2666"
 endif
 if !exists('g:tex_fold_env_char')
     "let g:tex_fold_env_char = '✎'
@@ -87,22 +86,23 @@ function! TeX_Fold_Force() "{{{1
 	normal! zE
 	call TeX_doc_startup()
 	call MakeTexFolds()
+
 endfunction
 "}}}
 
 function! TeX_doc_startup() "{{{1
 	let save_cursor = getpos(".")
-	exe '1'
+	exe 'normal! 1G'
 	let b:doc_class_line = search('\s*\\documentclass','cw')
 	let b:doc_begin_doc = search('\s*\\begin\s*{\s*document\s*}','cw')
 	call setpos('.', save_cursor)
 
 	if b:doc_class_line
-		let b:doc_class = getline(b:doc_class_line)
-		let b:doc_class = substitute(b:doc_class,
+		let b:tex_doc_class = getline(b:doc_class_line)
+		let b:tex_doc_class = substitute(b:tex_doc_class,
 					\ '\s*\\documentclass\(\[.*\]\)*{\([^}]*\)}.*','\2','')
 	else
-		let b:doc_class = ''
+		let b:tex_doc_class = ''
 	endif
 	let b:doc_name = expand("%:p")
 	let b:doc_len = line('$')
@@ -158,7 +158,7 @@ function! TeXFoldBlock(name,list,start) "{{{1
 	if a:start == list_len-1
 		let fold_start = a:list[a:start][0]
 		let fold_start_line = a:list[a:start][1]
-		if fold_start_line =~ '^\s*\\\(\(\sub\)\=section\|chapter\)'
+		if fold_start_line =~ '^\s*\\\(\(sub\)\?section\|chapter\)'
 			let fold_end = b:doc_len
 			if fold_end > fold_start
 				exe fold_start.",".fold_end." fold"
@@ -199,7 +199,9 @@ function! TeXFoldBlock(name,list,start) "{{{1
 				let fold_end = b:doc_len
 			endif
 			let end_pos = start_new
-			exe fold_start.",".fold_end." fold"
+			if (a:start > 0) || (end_pos < list_len-1)
+				exe fold_start.",".fold_end." fold"
+			endif
 		elseif fold_end_line_attempt =~ '^\s*\\'.s:tex_sect_patterns
 			let fold_end=a:list[a:start+1][0]-1
 			let end_pos=a:start+1
@@ -212,7 +214,7 @@ function! TeXFoldBlock(name,list,start) "{{{1
 		if fold_end_line_attempt =~'^\s*\\\(sub\)\?section'
 			let start_new = a:start+1
 			let start_new_line = a:list[a:start+1][1]
-			while start_new < len(a:list)-1
+			while start_new <= list_len-1
 				if start_new_line =~ '^\s*\\section'
 					let block_name = 'section'
 				else
@@ -227,7 +229,9 @@ function! TeXFoldBlock(name,list,start) "{{{1
 			endwhile
 			let fold_end = a:list[next_step][0]-1
 			let end_pos = next_step
-			exe fold_start.",".fold_end." fold"
+			if (a:start > 0) || (end_pos < list_len-1)
+				exe fold_start.",".fold_end." fold"
+			endif
 			return end_pos
 		else
 			let fold_end=a:list[a:start+1][0]-1
@@ -299,7 +303,7 @@ endfunction
 "}}}
 
 function! MakeTexFolds() "{{{1
-	if b:doc_class == 'beamer'
+	if b:tex_doc_class == 'beamer'
 		let fold_start_preamble = b:doc_class_line
 		let fold_end_preamble =  b:doc_begin_doc
 		if fold_end_preamble
@@ -389,7 +393,7 @@ function! MakeTexFolds() "{{{1
 endfunction
 "}}}
 
-silent! do LatexSuite User LatexSuiteFileType
+silent! do VimTeXtric User VimTeXtricFileType
 
 let &cpo = save_cpo
 
