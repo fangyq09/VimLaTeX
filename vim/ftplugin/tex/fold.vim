@@ -86,7 +86,6 @@ function! TeX_Fold_Force() "{{{1
 	normal! zE
 	call TeX_doc_startup()
 	call MakeTexFolds()
-
 endfunction
 "}}}
 
@@ -311,7 +310,7 @@ function! MakeTexFolds() "{{{1
 			exe fold_start_preamble.",".fold_end_preamble." fold"
 		endif
 		let s:tex_fold_beamer_key_lines = TeXGetKeyLineList(b:doc_name,
-					\ '\s*\\\(begin\|end\)\s*{\s*frame\s*}')	
+					\ '^\s*\\\(begin\|end\)\s*{\s*frame\s*}')	
 		let b:tex_fold_beamer_key_lines_len=len(s:tex_fold_beamer_key_lines)
 		if b:tex_fold_beamer_key_lines_len>1
 			let fold_count=0
@@ -330,15 +329,15 @@ function! MakeTexFolds() "{{{1
 	else
 		if g:tex_fold_envs_force
 			let s:tex_fold_env_key_lines = TeXGetKeyLineList(b:doc_name,
-						\ '\s*\\\(begin\|end\)\s*{\s*\('.join(s:tex_fold_envs_names,'\|').'\)')
+						\ '^\s*\\\(begin\|end\)\s*{\s*\('.join(s:tex_fold_envs_names,'\|').'\)')
 			let b:tex_fold_env_key_lines_len=len(s:tex_fold_env_key_lines)
 			if b:tex_fold_env_key_lines_len>1
 				let fold_count=0
 				while fold_count < b:tex_fold_env_key_lines_len-1
 					let fold_start_line = s:tex_fold_env_key_lines[fold_count][1]
-					if fold_start_line =~ '\s*\\begin\s*{\s*'
+					if fold_start_line =~ '^\s*\\begin\s*{\s*'
 						let env_name = substitute(fold_start_line,
-									\ '\s*\\begin\s*{\s*\([^}]*\)}.*','\1','')
+									\ '^\s*\\begin\s*{\s*\([^}]*\)}.*','\1','')
 						let fold_count = TeXFoldEnv(env_name,s:tex_fold_env_key_lines,fold_count)
 					else
 						let fold_count = fold_count + 1
@@ -350,7 +349,6 @@ function! MakeTexFolds() "{{{1
 		"let tex_patterns = '^\s*\\\('.s:tex_sect_patterns.'\|'.s:tex_env_patterns.'\)'
 		"let s:tex_fold_key_lines = TeXGetKeyLineList(b:doc_name,tex_patterns)
 		let s:tex_fold_key_lines =TeXGetKeyLineList(b:doc_name,'^\s*\\'.s:tex_sect_patterns)
-
 		if b:doc_class_line && b:doc_begin_doc && (b:doc_class_line < b:doc_begin_doc)
 			let fold_start_preamble = b:doc_class_line
 			let fold_end_preamble =  b:doc_begin_doc - 1
