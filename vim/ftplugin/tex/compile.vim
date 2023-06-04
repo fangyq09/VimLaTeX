@@ -17,12 +17,6 @@ if exists('b:loaded_vimtextric_compile')
 endif
 let b:loaded_vimtextric_compile = 1
 
-if !exists('g:vimtextric_view_pdf')
-	let b:vimtextric_view_pdf = 1
-else 
-	let b:vimtextric_view_pdf = g:vimtextric_view_pdf
-endif
-
 
 "if !exists('g:tex_flavor')
 "	let b:tex_flavor = 'latexmk'
@@ -140,39 +134,43 @@ endfunction
 
 "ViewPDF{{{
 function! s:SumatraSynctexForward(file)
-	lcd expand(%:p:h)
-	silent execute "!start SumatraPDF -reuse-instance ".a:file." -forward-search \"".expand("%:p")."\" ".line(".")
+	"exec 'lcd ' . expand(%:p:h)
+	"silent execute "!start SumatraPDF -reuse-instance ".a:file." -forward-search \"".expand("%:p")."\" ".line(".")
+	silent execute '!start SumatraPDF -reuse-instance '.a:file.' -forward-search "'.b:tmp_source.'" '.b:tmp_cursor[0]
 endfunction
 
 function! s:ZathuraSynctexForward(file)
-  let source = expand("%:p")
-  let input = shellescape(line(".").":".col(".").":".source)
+  "let source = expand("%:p")
+  "let input = shellescape(line(".").":".col(".").":".source)
+	let input = shellescape(b:tmp_cursor[0].":".b:tmp_cursor[0].":".b:tmp_source)
   "let execstr = 'zathura -x "gvim --servername '.v:servername.' --remote-silent +\%{line} \%{input}" --synctex-forward='.input.' '.a:file.' &'
-  let execstr = 'zathura -x "gvim --servername '.v:servername.' --remote-silent +exec\%{line} \%{input}" --synctex-forward='.input.' '.a:file.' &'
+  let execstr = 'zathura -x "gvim --servername '.v:servername
+				\ .' --remote-silent +exec\%{line} \%{input}" --synctex-forward='
+				\ .input.' '.a:file.' &'
   silent call system(execstr)
 endfunction
 
-function! s:TeXViewPDF(file)
+function! s:TeXViewPDF(pdf_file)
 	if has("unix")
-		call <SID>ZathuraSynctexForward(a:file)
+		call <SID>ZathuraSynctexForward(a:pdf_file)
 	elseif has('win32') || has ('win64')
-		call <SID>SumatraSynctexForward(a:file)
+		call <SID>SumatraSynctexForward(a:pdf_file)
 	endif
 endfunction
 "}}}
 
-function! s:TeXCompileCloseHandler(channel) "{{{CloseHandler
+function! s:TeXCompileCloseHandler(viewpdf,file,channel) "{{{CloseHandler
 	if empty(b:tex_compile_errors)
 		cclose
 		echo "successfully compiled"
-		if b:vimtextric_view_pdf 
-			silent! call <SID>TeXViewPDF(fnameescape(b:tex_pdf_name))
+		let pdf_file = fnamemodify(a:file,':p:r').'.pdf'
+		if a:viewpdf 
+			silent! call <SID>TeXViewPDF(fnameescape(pdf_file))
 		endif
 	else 
-		"let log_content = b:tex_compile_log
-		"let b:tex_compile_log = []
+		let log_file = fnamemodify(a:file,':p:r').'.log'
 		let engine = b:tex_engine
-		let log_content = readfile(b:tex_log_name)
+		let log_content = readfile(log_file)
 		call setqflist([], ' ', {'title' : engine})
 		let qfid = getqflist({'id' : 0}).id
 		silent! call setqflist([], 'a', {'id': qfid, 'lines': log_content,
@@ -206,47 +204,49 @@ function! s:TeXCancelJob() "{{{
 endfunction
 "}}}
 
-"{{{ RunLaTeX_job(file,engine) 
+"{{{ RunLaTeX_job(file,dir,engine,view) 
 "let b:tex_proj_dir = expand('%:p:h')
 let b:tex_engine_options = '-synctex=1 -file-line-error -interaction=nonstopmode'
 let b:tex_job_options = {
 			\ 'out_io': 'pipe',
 			\ 'out_cb': function('s:TeXCompileOutHandler'),
-			\ 'close_cb': function('s:TeXCompileCloseHandler'),
+			\ 'close_cb': function('s:TeXCompileCloseHandler',[0,'']),
 			\ }
-function! RunLaTeX_job(file,engine)
-	"exec 'lcd ' . fnameescape(b:tex_proj_dir)
+function! RunLaTeX_job(file,dir,engine,view)
+	let proj_dir = fnameescape(a:dir)
+	let tex_file = fnameescape(a:file)
+	"exec 'lcd ' . proj_dir
 	let b:tex_compile_errors = [] 
-	"let b:tex_compile_log = [] 
-	"let tex_dir = expand('%:p:h')    " current dir
-	"let tex_file = expand('%:p:t')    " current file
-	"let b:tex_pdf_name = expand('%:p:r') .. '.pdf'    " current pdf
+	let job_options = copy(b:tex_job_options)
+	let job_options['close_cb'] = function('s:TeXCompileCloseHandler',[a:view,a:file])
 	if has('unix')
-		let tex_cmd = 'cd ' . fnameescape(b:tex_proj_dir) . ' && ' . a:engine . ' '
-					\ . b:tex_engine_options. ' ' . a:file
+		let tex_cmd = 'cd ' . proj_dir . ' && ' . a:engine . ' '
+					\ . b:tex_engine_options. ' ' . tex_file
 		let cmd = ['/bin/sh', '-c', tex_cmd]
 	elseif has('win32') || has('win64')
-		let tex_cmd = 'cd /d ' . fnameescape(b:tex_proj_dir) . ' && ' . a:engine . ' '
-					\ . b:tex_engine_options. ' ' . a:file
+		let tex_cmd = 'cd /d ' . proj_dir . ' && ' . a:engine . ' '
+					\ . b:tex_engine_options. ' ' . tex_file
 		let cmd = &shell . ' /c ' . tex_cmd
 	endif
 	call setqflist([])
-	let b:run_tex_job = job_start(cmd, b:tex_job_options)
+	let b:run_tex_job = job_start(cmd, job_options)
 	"call timer_start(120000,function('s:TeXCheckJobStatus'))
 endfunction
 "}}}
 
-""{{{ RunLaTeX(file,engine)
-function! RunLaTeX(file,engine)
+""{{{ RunLaTeX(file,dir,engine,view)
+function! RunLaTeX(file,dir,engine,view)
 	let dir_old = getcwd()
-	exec 'lcd ' . b:tex_proj_dir
+	let proj_dir = fnameescape(a:dir)
+	exec 'lcd ' . proj_dir
+	let pdf_file = fnamemodify(a:file,':p:r').'.pdf'
 	silent setlocal shellpipe=>
 	call setqflist([]) " clear quickfix
 	let makeprg_old = &makeprg
-	let &makeprg = a:engine.' '.b:tex_engine_options.' --shell-escape '.a:file
+	let &makeprg = a:engine.' '.b:tex_engine_options.' '.fnameescape(a:file)
 	silent make!  
 	let &makeprg = makeprg_old
-	lcd dir_old
+	exec 'lcd ' . dir_old
 	if v:shell_error
 		let l:entries = getqflist()
 		if len(l:entries) > 0 
@@ -261,8 +261,8 @@ function! RunLaTeX(file,engine)
 	else
 		cclose
 		echon "successfully compiled"
-		if b:vimtextric_view_pdf
-			silent! call <SID>TeXViewPDF(fnameescape(b:tex_pdf_name))
+		if a:view
+			silent! call <SID>TeXViewPDF(fnameescape(pdf_file))
 		endif
 	endif
 endfunction
@@ -284,16 +284,17 @@ function! s:Compile_LaTeX_Run(engine,view)
 		echohl None
 		return ''
 	endif
-	let b:tex_pdf_name = substitute(b:tex_main_file_name,"\.tex$",".pdf","")
-	let b:tex_log_name = substitute(b:tex_main_file_name,"\.tex$",".log","")
 	let save_cursor= [bufnr("%"),line("."),col("."),0]
+	let b:tmp_cursor = save_cursor[1:2]
+	let b:tmp_source = expand("%:p")
 
 	" find TeX engine
 	if a:engine == 'auto'
 		if !exists('b:tex_engine')
 			" Get the TeX engine from the line % !TeX engine/grogram = pdflatex/xelatex
 			let l:current_file = expand('%:p')
-			let com_str = '^\c\s*%\+.\{-}\(!\)*\s*\(TeX\)*\s*\(engine\|program\)*\s*\(=\|:\)*\s*\(pdf\|xe\|lau\)*latex.*'
+			let com_str = '^\c\s*%.\{-}\(pdf\|xe\|lua\)latex\(\s.*\)*$' 
+			"let com_str = '^\c\s*%\+.\{-}\(!\)*\s*\(TeX\)*\s*\(engine\|program\)*\s*\(=\|:\)*\s*\(pdf\|xe\|lau\)*latex.*'
 			if b:tex_main_file_name == l:current_file
 				exe '1'
 				if !exists('b:doc_class_line')
@@ -319,7 +320,7 @@ function! s:Compile_LaTeX_Run(engine,view)
 			if tex_engine_com_line == 0
 				let b:tex_engine = 'pdflatex'
 			else
-				let  tex_engine_pre = substitute(line_text,com_str,'\5','')
+				let  tex_engine_pre = substitute(line_text,com_str,'\1','')
 				let b:tex_engine = tolower(tex_engine_pre) . 'latex'
 			endif
 		endif
@@ -328,15 +329,11 @@ function! s:Compile_LaTeX_Run(engine,view)
 	endif
 
 	""compile latex 
-	if a:view == 0
-		let b:vimtextric_view_pdf = 0
-	endif
+	echomsg "compiling with ".b:tex_engine."..."
 	if v:version >= 801
-		echomsg "compiling with ".b:tex_engine."..."
-		silent! call RunLaTeX_job(fnameescape(b:tex_main_file_name),b:tex_engine)
+		silent! call RunLaTeX_job(b:tex_main_file_name,b:tex_proj_dir,b:tex_engine,a:view)
 	else
-		echomsg "compiling with ".b:tex_engine."..."
-		silent! call RunLaTeX(fnameescape(b:tex_main_file_name),b:tex_engine)
+		silent! call RunLaTeX(b:tex_main_file_name,b:tex_proj_dir,b:tex_engine,a:view)
 	endif
 	call setpos('.', save_cursor)
 endfunction
@@ -354,10 +351,10 @@ endfunction
 
 "Compile BibTeX{{{1
 function! s:CompileBibTeX()
-	if !exists('b:tex_main_file_name')  || !exists('b:tex_proj_dir')
+	if !exists('b:tex_main_file_name')  || !exists('b:tex_proj_dir')|| (b:tex_main_file_name == '')
 		let [b:tex_main_file_name,b:tex_proj_dir] = Find_Main_TeX_File()
 	endif
-	lcd fnameescape(b:tex_proj_dir)
+	exec 'lcd ' . fnameescape(b:tex_proj_dir)
 	let l:tex_mfn = b:tex_main_file_name
 	if !exists('b:tex_bib_engine')  || (b:tex_bib_engine == '')
 		if search('\\addbibresource\s*{.\+}','cnw')
@@ -378,10 +375,10 @@ endfunction
 "
 "Compile asy {{{
 function! s:CompileAsy()
-	if !exists('b:tex_main_file_name')  || !exists('b:tex_proj_dir')
+	if !exists('b:tex_main_file_name')  || !exists('b:tex_proj_dir')|| (b:tex_main_file_name == '')
 		let [b:tex_main_file_name,b:tex_proj_dir] = Find_Main_TeX_File()
 	endif
-	lcd fnameescape(b:tex_proj_dir)
+	exec 'lcd ' . fnameescape(b:tex_proj_dir)
 	let l:tex_mfn = b:tex_main_file_name
 	if l:tex_mfn != ''
 		let l:tex_mf_asy = substitute(l:tex_mfn,"\.tex$","-*.asy","")
@@ -393,11 +390,95 @@ function! s:CompileAsy()
 endfunction
 "}}}
 
+function! s:TeX_Compile_Paragraph(engine) "{{{
+	silent write
+	let cur_cursor= [line("."),col(".")]
+	let curdir = expand("%:p:h")
+	if getftype('tmp') != 'dir'
+		call mkdir('tmp')
+	endif
+	"find the preamble
+	if exists('b:doc_begin_doc') && (b:doc_begin_doc > 0)
+		let preamble = getline(1,b:doc_begin_doc)
+		let curtexfname = expand("%:t:r")
+	else
+		let [b:tex_main_file_name,b:tex_proj_dir] = Find_Main_TeX_File()
+		if b:tex_main_file_name == ''
+			echomsg "no main tex file be found!" 
+			return ''
+		else
+			let curtexfname = fnamemodify(b:tex_main_file_name,':p:t:r')
+			let mainfile_content = readfile(b:tex_main_file_name) 
+			let preamble = []
+			for item in mainfile_content
+				call add(preamble,item)
+				if item =~ '^\s*\\begin\s*{\s*document\s*}'
+					break
+				endif
+			endfor
+		endif
+	endif
+	"find the tex engine
+	if a:engine == 'auto'
+		if !exists('b:tex_engine')
+			let com_pattern = '^\c\s*%.\{-}\(pdf\|xe\|lua\)latex\(\s.*\)*$' 
+			let engine_pre = ''
+			for item in preamble 
+				if item =~ com_pattern
+					let engine_pre = substitute(item,com_pattern,'\1','')
+					break
+				endif
+			endfor
+			if engine_pre == ''
+				let b:tex_engine = 'pdflatex'
+			else
+				let b:tex_engine = tolower(engine_pre.'latex')
+			endif
+		endif
+	else
+		let b:tex_engine = a:engine
+	endif
+	"find the current paragraph
+	let start_pos = search('^\s*\\\(chapter\|\(sub\)*section\|appendix\|begin\s*{\s*document\s*}\)','bcnW')
+	let end_pos = search('^\s*\\\(chapter\|\(sub\)*section\|appendix\|end\s*{\s*document\s*}\)','nW')
+	if start_pos == 0
+		let start_pos = 1
+	elseif getline(start_pos) =~ '^\s*\\begin\s*{\s*document\s*}'
+		let start_pos = start_pos + 1
+	endif
+	if end_pos == 0
+		let end_pos = line('$')
+	else
+		let end_pos = end_pos - 1
+	endif
+	"compile the paragraph 
+	if start_pos >= end_pos
+		return '' 
+	else
+		let content = getline(start_pos,end_pos)
+		let compile_part = extend(copy(preamble), content)
+		call add(compile_part,'\end{document}')
+		let tmp_file =  curdir.'/tmp/'.curtexfname.'_tmp.tex'
+		let tmp_dir = curdir . '/tmp'
+		call writefile(compile_part,tmp_file)
+		let b:tmp_cursor = [len(preamble) + cur_cursor[0] - start_pos + 1,cur_cursor[1]]
+		let b:tmp_source = tmp_file
+		echomsg "compiling the current paragraph with ".b:tex_engine."..."
+		if v:version >= 801
+			silent call RunLaTeX_job(tmp_file,tmp_dir,b:tex_engine,1)
+		else
+			silent call RunLaTeX(tmp_file,tmp_dir,b:tex_engine,1)
+		endif
+	endif
+endfunction
+"}}}
+
 nnoremap <silent> <buffer><F2>  :call <SID>Compile_LaTeX_Run('auto',1)<CR>
 nnoremap <silent> <buffer><S-F2>  :call <SID>Compile_LaTeX_Run('pdflatex',1)<CR>
 nnoremap <silent> <buffer><F6>  :call <SID>Compile_LaTeX_Run("xelatex",1)<CR> 
 nnoremap <silent> <buffer><F8> :call <SID>CompileBibTeX()<CR>
 nnoremap <silent> <buffer><C-c> : call <SID>TeXCancelJob()<CR>
+nnoremap <silent> <buffer><F3> : call <SID>TeX_Compile_Paragraph('auto')<CR>
 "{{{ menu
 	menu 8000.60.040 &LaTeX.&Compile.&DVI\ To\ PDF<tab> "<C-F6>  
 				\ :call <SID>DviToPDF(expand("%:r").".dvi")<CR>

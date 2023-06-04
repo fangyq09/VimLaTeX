@@ -13,6 +13,9 @@
 "let g:tex_fold_enabled = 0
 "or let g:tex_fold_enabled = 1
 "because of both of these setting will cause much slower.
+if exists('g:tex_fold_enabled')
+	unlet g:tex_fold_enabled
+endif
 "=============================================================================
 
 if exists('b:loaded_vimtextric_folding')
@@ -78,7 +81,11 @@ let s:tex_env_patterns = '\(\(begin\|end\)\s*{\s*\('.s:tex_env_names.'\)\)'
 let s:tex_sect_patterns = '\('.join(s:tex_fold_sect_key_words,'\|').'\)'
 
 
-function! TeX_Fold_Force() "{{{1
+function! TeX_Fold_Force() "{{{
+	if exists('b:vimtextric_fold_done')
+		return
+	endif
+	let b:vimtextric_fold_done = 1
 	if g:tex_fold_override_foldtext
 		setlocal foldtext=TeXFoldText()
 	endif
@@ -129,25 +136,25 @@ function! TeXFoldText() "{{{1
 			let fold_type = substitute(fold_type,'\\','','')
 			let [pattern, fold_symbol] = s:tex_fold_text_patterns[fold_type]
 			let repl = mas . ' ' .fold_symbol. ' \1'
-			let laba = ''
+			let line = substitute(fold_line, pattern, repl, '') . ' '
+			"let laba = ''
+			return line
     elseif fold_line =~ '^\s*\(\\\[\)*\s*\\begin'
-        let pattern = '^\s*\(\\\[\)*\s*\\begin{\([^}]*\)}'
-        let repl = mas . ' ' . g:tex_fold_env_char . ' \2 '
-				"if fold_line =~ '\\label'
-				"	let laba = ''
-				"else
-					"let laba = matchstr(getline(v:foldstart + 1),'\\label{[^}]*}')
-				"end
-				let laba = substitute(getline(v:foldstart + 1),'^\s*','','')
-    endif
-
-    let line = substitute(fold_line, pattern, repl, '') . ' '
-    
-		if fold_line =~ '^\s*\\documentclass'
-				return mas . fold_line
+			let pattern = '^\s*\(\\\[\)*\s*\\begin{\([^}]*\)}'
+			let repl = mas . ' ' . g:tex_fold_env_char . ' \2 '
+			"if fold_line =~ '\\label'
+			"	let laba = ''
+			"else
+			"let laba = matchstr(getline(v:foldstart + 1),'\\label{[^}]*}')
+			"end
+			let laba = substitute(getline(v:foldstart + 1),'^\s*','','')
+			let line = substitute(fold_line, pattern, repl, '') . ' '
+			return line . laba
+		"elseif fold_line =~ '^\s*\\documentclass'
 		else
-    		return line . laba
+			return mas . fold_line
 		endif
+
 endfunction
 "}}}
 
@@ -301,7 +308,7 @@ function! TeXFoldEnv(name,list,start) "{{{1
 endfunction
 "}}}
 
-function! MakeTexFolds() "{{{1
+function! MakeTexFolds() "{{{
 	if b:tex_doc_class == 'beamer'
 		let fold_start_preamble = b:doc_class_line
 		let fold_end_preamble =  b:doc_begin_doc
