@@ -2,8 +2,8 @@
 " 	     File: imaps.vim
 "      Author: Yangqin Fang
 "       Email: fangyq09@gmail.com
-" 	  Version: 1.1 
-"     Created: 11/04/2013
+" 	  Version: 1.5 
+"     Created: 11/06/2013
 " 
 "  Description: An imaps plugin for LaTeX
 "  put it into ~/.vim/ftplugin/tex/
@@ -25,12 +25,6 @@ if exists("b:loaded_vimtextric_imaps")
 	finish
 endif
 let b:loaded_vimtextric_imaps = 1
-
-if !exists('g:vimtextric_TEXIMAP')
-	let b:vimtextric_TEXIMAP = 1
-else 
-	let b:vimtextric_TEXIMAP = g:vimtextric_TEXIMAP
-endif
 
 "{{{ envs
 let s:MapsEnvDict = {
@@ -281,76 +275,75 @@ function! Tex_env_Debug(word,env,len) "{{{
 	else
 		let rhs = a:word
 	endif
-	let events = PutTextWithMovement(rhs)
+	if rhs =~  '<++>'
+		let movement = "\<esc>:call\ search('<++>','bcW')\<cr>".'"_4s'
+	else
+		let movement = ''
+	endif
+	let events = rhs . movement
 	return bkspc.events
 endfunction
 "}}}
 
-""""%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-fun! s:Hash(text) "{{{
-	return substitute(a:text, '\([^[:alnum:]]\)',
-				\ '\="_".char2nr(submatch(1))."_"', 'g')
-endfun
-"}}}
-function! TEXIMAP(lhs, rhs,...) "{{{1
-	let hash = s:Hash(a:lhs)
-	let s:Map_tex_{hash} = a:rhs
-	let lastLHSChar = a:lhs[strlen(a:lhs)-1]
-	let hash = s:Hash(lastLHSChar)
-	if !exists("s:LHS_tex_" . hash)
-		let s:LHS_tex_{hash} = escape(a:lhs, '\')
-	else
-		let s:LHS_tex_{hash} = escape(a:lhs, '\') .'\|'.  s:LHS_tex_{hash}
-	endif
+""""==========================================================================
 
-	" map only the last character of the left-hand side.
-	if lastLHSChar == ' '
-		let lastLHSChar = '<space>'
-	end
-	if a:0 > 0
-		exe 'inoremap <silent>'
-					\ escape(lastLHSChar, '|')
-					\ '<C-r>=<SID>LookupCharacter("' .
-					\ escape(lastLHSChar, '\|"') .
-					\ '","'.a:1.'")<CR>'
-	else
-		exe 'inoremap <silent>'
-					\ escape(lastLHSChar, '|')
-					\ '<C-r>=<SID>LookupCharacter("' .
-					\ escape(lastLHSChar, '\|"') .
+let s:TeX_IMAP_dict = {
+			\ "__" : "_{<++>}",
+			\ "^^" : "^{<++>}",
+			\ "$$" : "$<++>$",
+			\ "{}" : "{<++>}",
+			\ "()" : "(<++>)",
+			\ '\{' : "\\{<++>\\}",
+			\ "`8" : "\\infty",
+			\ "`9" : "\\subseteq",
+			\ "`6" : "\\partial",
+			\ '`\' : "\\setminus",
+			\ '`e' : "\\emptyset",
+			\ "[]" : "[<++>]",
+			\ "`0" : "\\supseteq",
+			\ }                
+function! s:TEXIMAP()   "{{{
+	if exists('b:teximap_done')
+		return
+	endif
+	let b:teximap_done = 1
+	let keys_list = keys(s:TeX_IMAP_dict)
+	let lastchars_list = map(copy(keys_list),"v:val[-1:]")
+	for char in lastchars_list
+		exec 'inoremap <silent><buffer><nowait>'
+					\ escape(char, '|')
+					\ '<C-r>=<SID>LookupChar("' .
+					\ escape(char, '\|"') .
 					\ '")<CR>'
-	endif
+	endfor
 endfunction
 "}}}
-
-function! s:LookupCharacter(char,...) "{{{1
-	let charHash = s:Hash(a:char)
-	let text = strpart(getline("."), 0, col(".")-1) . a:char
-	"if !exists('lhs') || !exists('rhs')
-		let lhs = matchstr(text, "\\C\\V\\(" . s:LHS_tex_{charHash} . "\\)\\$")
-		if strlen(lhs) == 0
-			return a:char
-		else
-			let hash = s:Hash(lhs)
-			let rhs = s:Map_tex_{hash}
-		endif
-	"endif
-	let bs = substitute(strpart(lhs, 1), ".", "\<bs>", "g")
-	" \<c-g>u inserts an undo point
-	if a:0 > 0
-		return a:char . "\<c-g>u\<bs>" . bs . PutTextWithMovement(rhs,a:1)
+function! s:LookupChar(char) "{{{
+	let keys_list = keys(s:TeX_IMAP_dict)
+	let text = strpart(getline("."), col(".") - 2, 1, v:true) . a:char
+	let match_keys = filter(copy(keys_list),'v:val == text')
+	if empty(match_keys)
+		return a:char
 	else
-		return a:char . "\<c-g>u\<bs>" . bs . PutTextWithMovement(rhs)
+		let lhs = match_keys[0]
+		let rhs = get(s:TeX_IMAP_dict,lhs)
+		let bs = substitute(strpart(lhs, 1), ".", "\<bs>", "g")
+		if rhs =~  '<++>'
+			let movement = "\<esc>:call\ search('<++>','bcW')\<cr>".'"_4s'
+		else
+			let movement = ''
+		endif
+		" \<c-g>u inserts an undo point
+		return a:char . "\<c-g>u\<bs>" . bs . rhs . movement
 	endif
 endfunction
 "}}}
+call <SID>TEXIMAP()
 
-function! PutTextWithMovement(str,...) "{{{1
-	if a:0 > 0
-		let movement = "\<esc>".a:1."a"
-	elseif a:str =~ '<++>'
-		"let movement = "\<esc>?<++>\<cr>".'"_4s'
-		let movement = "\<esc>?<++>\<cr>:call\ TeX_Outils_RLHI()\<cr>".'"_4s'
+"==========================================================================
+function! s:PutTextWithMovement(str) "{{{1
+	if a:str =~ '<++>'
+		let movement = "\<esc>:call\ search('<++>','bcW')\<cr>".'"_4s'
 	else
 		let movement = ''
 	endif
@@ -358,46 +351,12 @@ function! PutTextWithMovement(str,...) "{{{1
 endfunction
 "}}}
 
-
-function! TeX_Outils_RLHI() "{{{
-	call histdel("/", -1)
-	let @/ = histget("/", -1)
-	return ''
-endfunction
-"}}}
-
-"{{{ TEXIMAP
-if b:vimtextric_TEXIMAP
-call TEXIMAP("__","_{<++>}")
-call TEXIMAP("^^","^{<++>}")
-call TEXIMAP("$$","$<++>$")
-"call TEXIMAP("{}","{}",'h')
-"call TEXIMAP("()","()",'h')
-"call TEXIMAP("[]","[]",'h')
-call TEXIMAP("()","(<++>)")
-call TEXIMAP("[]","[<++>]")
-call TEXIMAP("{}","{<++>}")
-call TEXIMAP("||","|<++>|")
-call TEXIMAP("`8","\\infty")
-call TEXIMAP("`9","\\subseteq")
-call TEXIMAP("`0","\\supseteq")
-call TEXIMAP("`6","\\partial")
-call TEXIMAP("`~","\\widetilde{<++>}")
-"call TEXIMAP("`^","\\widehat{<++>}")
-call TEXIMAP('`\',"\\setminus")
-call TEXIMAP('`e',"\\emptyset")
-"call TEXIMAP('\[',"\\[\<cr><++>\<cr>\\]")
-call TEXIMAP('\{',"\\{<++>\\}")
-call TEXIMAP('\(',"\\(<++>\\)")
-call TEXIMAP('`/',"\\frac{<++>}{}")
-endif
-"}}}
-""""%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 "{{{let s:KeyWDict ={}
 let s:KeyWDict = { 
 			\ '()' : '\left(<++>\right)',
 			\ '[]' : '\left[<++>\right]',
 			\ '{}' : '\left\{<++>\right\}',
+			\ '{' : '\{<++>\}',
 			\ 'fig' :  "\\begin{figure}[H]\<cr>\\centering\<cr>"
 			\ ."\\includegraphics[width=\\textwidth]{<++>}\<cr>\\end{figure}",
 			\ 'enu' : "\\begin{enumerate}[label=(\\arabic*)]\<cr>"
@@ -473,20 +432,19 @@ function! s:PutEnv() "{{{
 		let events = ''
 	elseif has_key(s:KeyWDict,key_word)
 		let rhs = get(s:KeyWDict,key_word)
-		let events = PutTextWithMovement(rhs)
+		let events = s:PutTextWithMovement(rhs)
 	elseif has_key(s:Maps_envs_abbrv,key_word)
 		let env_name = get(s:Maps_envs_abbrv,key_word)
 		let rhs= "\\begin{".env_name."}\<cr><++>\<cr>\\end{".env_name."}"
-		let events = PutTextWithMovement(rhs)
+		let events = s:PutTextWithMovement(rhs)
 	else
 		let env_name = key_word
 		let rhs= "\\begin{".env_name."}\<cr><++>\<cr>\\end{".env_name."}"
-		let events = PutTextWithMovement(rhs)
+		let events = s:PutTextWithMovement(rhs)
 	end
 	return events
 endfunction
 "}}}
-
 
 " vim:fdm=marker ff=unix
 
