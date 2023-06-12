@@ -2,15 +2,18 @@
 " 	     File: compile.vim
 "      Author: Yangqin Fang
 "       Email: fangyq09@gmail.com
-" 	  Version: 1.1 
-"     Created: 07/04/2013
+" 	  Version: 2.0 
+"     Created: 06/06/2013
 " 
 "  Description: A compile plugin for LaTeX
-"  In normal mode, press <F2> to run pdflatex or xelatex, auto detect TeX
-"  engine; press <S-F2> to run pdflatex; press <F6> to run xelatex;
-"  press <F8> to compile bibtex. If you split you project into many separated
-"  tex files, for example chapter1.tex, chapter2.tex, ..., in any chapter, you
-"  press the shortcuts, it's all feasible.
+"  In normal mode,
+"  1. press <F2> to run pdflatex or xelatex (auto detect TeX engine); 
+"  2. press <S-F2> to run pdflatex; 
+"  3. press <F6> to run xelatex;
+"  4. press <F8> to compile bibtex or biblatex;
+"  5. pree <F3> to compile current paragraph (auto detect TeX engine).
+"  In case you split your project into many separated tex files, for example 
+"  chapter1.tex, chapter2.tex, ..., in any chapter, the shortcuts are all feasible.
 "=============================================================================
 if exists('b:loaded_vimtextric_compile')
 	finish
@@ -18,12 +21,6 @@ endif
 let b:loaded_vimtextric_compile = 1
 
 
-"if !exists('g:tex_flavor')
-"	let b:tex_flavor = 'latexmk'
-"else
-"	let b:tex_flavor = g:tex_flavor
-"endif
-"exec "compiler ".b:tex_flavor
 let &efm = '%-P**%f,%-P**"%f",%E! LaTeX %trror: %m,%E%f:%l: %m,'
 			\ . '%E! %m,%Z<argument> %m,%Cl.%l %m,%-G%.%#'
 
@@ -185,7 +182,7 @@ endfunction
 "}}}
 
 function! s:TeXCompileOutHandler(job_id, msg) "{{{OutHandler
-	if a:msg =~ '^\(.\{-}\.\(tex\|sty\):\d\+\|! LaTeX Error\):.*'
+	if a:msg =~ '^\(.\{-}\.\(tex\|sty\):\d\+\|! \(LaTeX Error\|Emergency stop\)\)'
 		call add(b:tex_compile_errors, a:msg)
 	endif
 endfunction
@@ -490,6 +487,8 @@ nnoremap <silent> <buffer><F3> : call <SID>TeX_Compile_Paragraph('auto')<CR>
 				\ :call <SID>CompileBibTeX()<CR>
 	menu 8000.60.080 &LaTeX.&Compile.&Compile\ Asy<tab> "<C-F8>		
 				\ :call <SID>CompileAsy()<CR>
+	menu 8000.60.090 &LaTeX.&Compile.&Compile\ Paragraph<tab><F3>		
+				\ :call <SID>TeX_Compile_Paragraph('auto')<CR>
 
 "}}}
 "
