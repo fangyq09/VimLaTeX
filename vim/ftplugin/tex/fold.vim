@@ -2,8 +2,8 @@
 " 	     File: fold.vim
 "      Author: Yangqin Fang
 "       Email: fangyq09@gmail.com
-" 	  Version: 1.1 
-"     Created: 03/04/2013
+" 	  Version: 2.0 
+"     Created: 12/06/2013
 " 
 "  Description: A manual LaTeX fold plugin by analogy to syntax fold
 "This plugin provides a LaTeX syntax fold similar to syntax folding. 
@@ -93,6 +93,7 @@ function! TeX_Fold_Force() "{{{
 	normal! zE
 	call TeX_doc_startup()
 	call MakeTexFolds()
+	normal! zv
 endfunction
 "}}}
 
@@ -233,8 +234,12 @@ function! TeXFoldBlock(name,list,start) "{{{1
 					break
 				endif
 			endwhile
-			let fold_end = a:list[next_step][0]-1
-			let end_pos = next_step
+			if start_new <= list_len -1
+				let fold_end = a:list[next_step][0]-1
+			else
+				let fold_end = b:doc_len
+			endif
+			let end_pos = start_new
 			if (a:start > 0) || (end_pos < list_len-1)
 				exe fold_start.",".fold_end." fold"
 			endif
