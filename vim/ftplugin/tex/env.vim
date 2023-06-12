@@ -33,24 +33,36 @@ let s:tex_KeyEnvList = [
 			\ ['co\%[rollary]', 'corollary', ''],
 			\ ['le\%[ema]', 'lemma', ''],
 			\ ['re\%[mark]', 'remark', ''],
-			\ ['item\%[ize]', 'itemize', ''],
-			\ ['enu\%[merate]', 'enumerate', '[label={(\arabic*)}]'],
-			\ ['des\%[cription]', 'description', ''],
 			\ ['prob\%[lem]', 'problem', ''],
 			\ ['exe\%[rcise]', 'exercise', ''],
 			\ ['exa\%[mple]', 'example', ''],
+			\ ['que\%[stion]', 'question', ''],
+			\ ['item\%[ize]', 'itemize', ''],
+			\ ['enu\%[merate]', 'enumerate', '[label={(\arabic*)}]'],
+			\ ['des\%[cription]', 'description', ''],
 			\ ['cas\%[es]', 'cases', ''],
 			\ ['ncas', 'numcases', '{}'],
 			\ ['ar\%[ray]', 'array', '{}'],
 			\ ['cen\%[ter]', 'center', ''],
+			\ ['mult\%[line]', 'multline*', ''],
 			\ ['tabl\%[e]', 'table', '\label{tab:}\centering\caption{}'],
 			\ ['tabu\%[lar]', 'tabular', '{}'],
-			\ ['fig\%[ure]', 'figure', '[H]\label{fig:}\centering\caption{}']
+			\ ['fig\%[ure]', 'figure', '[H]\label{fig:}\centering\caption{}'],
+			\ ['conj\%[ecture]', 'conjecture', ''],
+			\ ['alg\%[orithm]', 'algorithm', ''],
+			\ ['minip\%[age]', 'minipage', '{0.5\textwidth}'],
+			\ ['list', 'list', '{<label format>}{<item format>}']
 			\	]
 "}}}
 
 let s:tex_inside_envs = ['aligned', 'gathered', 'array', 'cases', 'split']
-let s:tex_outside_envs = ['center', 'figure', 'table']
+let s:tex_outside_envs = ['center', 'figure', 'table', 'minipage']
+
+
+function! s:tex_outils_ismath(zname)
+  return match(map(synstack(line('.'), max([col('.') - 1, 1])),
+        \ 'synIDattr(v:val, ''name'')'), a:zname) >= 0 
+endfunction
 "Get env name, begin pos, end pos and length of the env
 function! GetTeXEnv(mode) "{{{1
 	let pos = getpos('.')
@@ -96,7 +108,7 @@ function! GetTeXEnv(mode) "{{{1
 	elseif a:mode == 'math'
 		let cl = line('.')
 		let cc = col('.')
-		if tex#outils#ismath("texMathZoneX")
+		if s:tex_outils_ismath("texMathZoneX")
 			let b_start = searchpos('\$','bWc')
 			let b_end = searchpos('\$','Wn')
 			let result = ['ilm',b_start,b_end,[1,1]]
@@ -104,7 +116,7 @@ function! GetTeXEnv(mode) "{{{1
 			let result = ['',[0,0],[0,0],[0,0]]
 		endif
 	elseif a:mode == 'com'
-		if tex#outils#ismath("texMathZone")==0
+		if s:tex_outils_ismath("texMathZone")==0
 			let result = ['',[0,0],[0,0],[0,0]]
 		else
 			let result = ['',[0,0],[0,0],[0,0]]
@@ -214,7 +226,7 @@ function! s:Change_surroundings(mode,old_env,name) "{{{
 		let newstartline = substitute(oldstartline,".\\{".subse."}\\zs.\\{".oldenv_startlen."}\\ze",first,"")
 		call setline(oldenv_startline,newstartline)
 	elseif oldenv_name == 'ilm'
-		let delta = oldenv_endline - oldenv_startline + 4
+		let delta = oldenv_endline - oldenv_startline + 5
 		let oldendline = getline(oldenv_endline)
 		"let endline_indent = matchstr(oldendline,'^\s*')
 		if a:name[0] == 'sdm'
@@ -333,12 +345,21 @@ function! s:Change_surroundings(mode,old_env,name) "{{{
 					endif
 				endif
 				let oldenv_name = escape(oldenv_name,'*')
-				let env_close_old = getline(oldenv_endline)
-				let env_close_new = substitute(env_close_old,'\\end{'.oldenv_name.'}',
-							\ '\\end{'.new_env_name.'}','')
-				let env_open_old = getline(oldenv_startline)
-				let env_open_new = substitute(env_open_old,'\\begin{'.oldenv_name.'}',
-							\ '\\begin{'.new_env_name.'}','')
+				if index(['itemize', 'enumerate', 'description', 'list'], a:name[0]) >=0
+					let oldstartline = getline(oldenv_startline)
+					let startline_indent = matchstr(oldstartline,'^\s*')
+					let oldendline = getline(oldenv_endline)
+					let endline_indent = matchstr(oldendline,'^\s*')
+					let env_close_new = endline_indent . '\end{'.a:name[0].'}'
+					let env_open_new = startline_indent . '\begin{'.a:name[0].'}'.a:name[1]
+				else
+					let env_close_old = getline(oldenv_endline)
+					let env_close_new = substitute(env_close_old,'\\end{'.oldenv_name.'}',
+								\ '\\end{'.new_env_name.'}','')
+					let env_open_old = getline(oldenv_startline)
+					let env_open_new = substitute(env_open_old,'\\begin{'.oldenv_name.'}',
+								\ '\\begin{'.new_env_name.'}','')
+				endif
 				call setline(oldenv_endline,env_close_new)
 				call setline(oldenv_startline,env_open_new)
 			endif
@@ -348,7 +369,7 @@ function! s:Change_surroundings(mode,old_env,name) "{{{
 endfunction
 "}}}
 function! s:TeX_change_env(mode) "{{{
-	if (a:mode == "com" || a:mode == "math") && (tex#outils#ismath("texMathZone")==0)
+	if (a:mode == "com" || a:mode == "math") && (s:tex_outils_ismath("texMathZone")==0)
 		echo "You are not inside environment !"
 		return
 	endif
@@ -380,7 +401,9 @@ function! s:TeX_change_env(mode) "{{{
 		endif
 	else
 		let newenv_pre = input('change it to:')
-		if newenv_pre =~ '\\['
+		if newenv_pre == ''
+			return ''
+		elseif newenv_pre =~ '\\['
 			let newenv = ['sdm', '']
 		else
 			let count_num = 0
@@ -399,26 +422,8 @@ function! s:TeX_change_env(mode) "{{{
 	call <SID>Change_surroundings(a:mode,old_env,newenv)
 endfunction
 "}}}1
-"{{{https://stackoverflow.com/questions/1533565/how-to-get-visually-selected-text-in-vimscript
-function! s:get_visual_selection()
-    " Why is this not a built-in Vim script function?!
-    let [line_start, column_start] = getpos("'<")[1:2]
-    let [line_end, column_end] = getpos("'>")[1:2]
-    let lines = getline(line_start, line_end)
-		if len(lines) == 0
-			return ''
-		else
-			let lines[-1] = lines[-1][: column_end - (&selection == 'inclusive' ? 1 : 2)]
-			let lines[0] = lines[0][column_start - 1:]
-			return join(lines, "\n")
-		endif
-endfunction
-"}}}
 
-function! s:TeX_add_surroundings()
-endfunction
-"vnoremap <C-i> :<C-u>call <SID>TeX_add_surroundings()<CR>
-nnoremap <silent><buffer><F3> :call <SID>TeX_change_env('com')<cr>
+nnoremap <silent><buffer>cm :call <SID>TeX_change_env('com')<cr>
 nnoremap <silent><buffer><F4> :call <SID>TeX_change_env('math')<cr>
 nnoremap <silent><buffer><F5> :call <SID>TeX_change_env('env')<cr>
 
