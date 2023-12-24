@@ -25,7 +25,7 @@ endif
 let colors_name = "parbermad"
 
 "hi Normal		guifg=#000000 guibg=#E4DABE		ctermfg=0 ctermbg=222
-hi Normal		guifg=#000000 guibg=#FFF0BA		ctermfg=0 ctermbg=222
+hi Normal		guifg=#000000 guibg=#FFF0BA		ctermfg=0 ctermbg=230
 hi ErrorMsg		guifg=red guibg=#ffffff		ctermfg=9 ctermbg=15
 hi Error		guifg=red guibg=#ffffff		ctermfg=9 ctermbg=15
 hi Visual		guifg=#8080ff guibg=fg		gui=reverse		ctermfg=63 ctermbg=fg cterm=reverse
@@ -57,7 +57,7 @@ hi Cursor      guifg=#ffffff guibg=#6600CC ctermfg=15 ctermbg=55
 hi lCursor		 guifg=#ffffff guibg=#000000 ctermfg=15 ctermbg=0
 hi CursorLine  guibg=peachpuff ctermbg=223 
 hi CursorIM    guifg=#000000	guibg=#8A4C98 ctermfg=0  ctermbg=53	
-hi Comment	guifg=black guibg=#F5DEB3 ctermfg=0  ctermbg=7	
+hi Comment	guifg=black guibg=#F5DEB3 ctermfg=0  ctermbg=255	
 hi String		guifg=DarkGreen gui=bold ctermfg=22  cterm=bold
 hi Special	guifg=BlueViolet gui=bold ctermfg=57  cterm=bold
 hi Identifier	guifg=brown gui=none ctermfg=215  cterm=bold
